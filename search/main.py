@@ -9,11 +9,10 @@ def main():
     
     if uploaded_file is not None:
         st.write(f'### Uploaded File: {uploaded_file.name}')
-        
-    st.title("PDF Text Extractor")
-    st.write("Upload a PDF file and extract text using the API.")
     
     if uploaded_file is not None:
+        st.title("PDF Text Extractor")
+        st.write("Upload a PDF file and extract text using the API.")
         if st.button("Extract Text"):
             files = {"file": uploaded_file.getvalue()}
             response = requests.post("http://127.0.0.1:5000/extract-text", files=files)
