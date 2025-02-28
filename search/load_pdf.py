@@ -27,6 +27,8 @@ def extract_text():
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
     
+    print(request.files)
+    
     pdf_file = request.files["file"]
     extracted_text = load_pdf(pdf_file)
     
