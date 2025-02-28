@@ -4,7 +4,7 @@ import streamlit as st
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, origins='*')
+CORS(app, origins='https://ey-ai-search.streamlit.app/')
 
 def load_pdf(pdf_file):
     """
