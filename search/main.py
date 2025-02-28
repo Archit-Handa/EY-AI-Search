@@ -16,6 +16,7 @@ def main():
     if uploaded_file is not None:
         if st.button("Extract Text"):
             files = {"file": uploaded_file.getvalue()}
+            st.write(files)
             response = requests.post("http://127.0.0.1:5000/extract-text", files=files)
             
             if response.status_code == 200:
