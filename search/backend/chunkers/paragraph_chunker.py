@@ -1,8 +1,9 @@
 from .base import Chunker
+from typing import Generator
 
 class ParagraphChunker(Chunker):
     '''Chunk a text into smaller chunks based on paragraph breaks'''
     
-    # TODO: Implement paragraph chunker
-    def chunk(self, text: str) -> list[str]:
-        ...
+    def chunk(self, text: str) -> Generator[str]:
+        for para in text.split('\n\n'):
+            yield para
