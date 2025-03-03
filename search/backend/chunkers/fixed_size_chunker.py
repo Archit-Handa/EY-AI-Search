@@ -1,8 +1,11 @@
 from .base import Chunker
+from typing import Generator
 
 class FixedSizeChunker(Chunker):
     '''Chunk a text into smaller chunks of a fixed size'''
+    def __init__(self, chunk_size: int = 200):
+        self.chunk_size = chunk_size
     
-    # TODO: Implement fixed size chunker
-    def chunk(self, text: str) -> list[str]:
-        ...
+    def chunk(self, text: str) -> Generator[str]:
+        for i in range(0, len(text), self.chunk_size):
+            yield text[i: i+self.chunk_size]
