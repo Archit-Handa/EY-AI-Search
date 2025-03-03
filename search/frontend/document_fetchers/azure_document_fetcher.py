@@ -4,6 +4,8 @@ from io import BytesIO
 from .base import DocumentFetcher
 
 class AzureDocumentFetcher(DocumentFetcher):
+    '''Fetch and return a document from Azure Blob Storage'''
+    
     def fetch_document(self):
         AZURE_CONNECTION_STRING = st.text_input(
             label='Azure Storage Connection String',
