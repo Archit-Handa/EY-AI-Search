@@ -1,8 +1,8 @@
 from .base import Chunker
+from typing import Generator
 
 class PageChunker(Chunker):
     '''Chunk a text into smaller chunks based on page breaks'''
     
-    # TODO: Implement page chunker
-    def chunk(self, text: str) -> list[str]:
-        ...
+    def chunk(self, text: str) -> Generator[str]:
+        yield text
