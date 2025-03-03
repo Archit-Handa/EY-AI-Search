@@ -5,7 +5,7 @@ class Chunker(ABC):
     '''Abstract base class for chunkers'''
     
     @abstractmethod
-    def chunk(self, text: str) -> Generator[str]:
+    def chunk(self, text: str) -> Generator[str, None, None]:
         '''
         Chunk a text into smaller chunks
         
