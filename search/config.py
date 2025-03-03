@@ -1,3 +1,5 @@
+# TODO: Integrate with other frontend and backend components
+
 class Config:
     def __init__(self):
         self.BACKEND_URL_PATH = 'http://127.0.0.1:5000'
