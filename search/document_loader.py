@@ -33,6 +33,7 @@ class JsonLoader(DocumentLoader):
     def load(self, file_path: str) -> str:
         import json
         
+        print(file_path)
         with open(file_path, "r", encoding="utf-8") as file:
             return json.load(file)
         

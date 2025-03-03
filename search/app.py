@@ -1,6 +1,8 @@
 import streamlit as st
 import requests
 
+BACKEND_URL_PATH = 'http://127.0.0.1:5000'
+
 def main():
     st.title('AI Search - EY')
     st.write('Upload a Document (PDF, DOCX, JSON, or TXT file)')
@@ -12,8 +14,8 @@ def main():
         extract_button = st.empty()
         if extract_button.button('Extract Text'):
             with st.status('Extracting Text...', expanded=True) as status:
-                files = {'file': uploaded_file.getvalue()}
-                response = requests.post('http://127.0.0.1:5000/extract-text', files=files)
+                files = {'file': (uploaded_file.name, uploaded_file.getvalue())}
+                response = requests.post(f'{BACKEND_URL_PATH}/extract-text', files=files)
                 
                 if response.status_code == 200:
                     status.update(label='Text Extracted', state='complete')
