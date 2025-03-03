@@ -1,5 +1,6 @@
 streamlit
 watchdog
 pymupdf
+python-docx
 flask
 flask-cors
