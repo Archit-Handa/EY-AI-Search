@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from pdf_loader import PDFLoader
+from search.document_loader import get_loader
 
 app = Flask(__name__)
 CORS(app, origins='*')
@@ -11,7 +11,12 @@ def extract_text():
         return jsonify({'error': 'No file uploaded'}), 400
     
     pdf_file = request.files['file']
-    extracted_text = PDFLoader.load_pdf(pdf_file)
+    doc_loader = get_loader(pdf_file.filename.split('.')[-1])
+    
+    if doc_loader is None:
+        return jsonify({'error': 'Unsupported file format'}), 400
+    
+    extracted_text = doc_loader.load(pdf_file)
     
     return jsonify({'extracted_text': extracted_text}), 200
 
