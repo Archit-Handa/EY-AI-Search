@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from document_loader import get_loader
+from document_loaders import get_loader
 
 app = Flask(__name__)
 CORS(app, origins='*')
