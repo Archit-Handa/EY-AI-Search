@@ -2,6 +2,8 @@ import fitz
 from .base import DocumentLoader
 
 class PDFLoader(DocumentLoader):
+    '''Loader for .pdf files'''
+    
     def load(self, file_stream: str) -> str:
         text = ''
         try:
