@@ -38,7 +38,7 @@ def chunk_text():
     
     chunks = chunker.chunk(text)
     
-    return jsonify({'chunks': chunks}), 200
+    return jsonify({'chunks': list(chunks)}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

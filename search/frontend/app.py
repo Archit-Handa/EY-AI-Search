@@ -1,6 +1,7 @@
 import streamlit as st
 from document_fetchers import get_fetcher
 from extract_file import extract_file
+from chunk_text import chunk_text
 
 def main():
     st.set_page_config('AI Search - EY')
