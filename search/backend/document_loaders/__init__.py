@@ -20,4 +20,4 @@ def get_loader(file_extension: str) -> DocumentLoader:
     
     return loaders.get(file_extension.lower(), None)
 
-__all__ = ['PDFLoader', 'DocxLoader', 'TxtLoader', 'JsonLoader', 'get_loader']
+__all__ = ['get_loader']
