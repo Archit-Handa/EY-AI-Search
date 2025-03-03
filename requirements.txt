@@ -4,3 +4,4 @@ pymupdf
 python-docx
 flask
 flask-cors
+azure-storage-blob
