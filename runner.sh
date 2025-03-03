@@ -9,17 +9,17 @@ OS=$(uname | tr '[:upper:]' '[:lower:]')
 if [[ "$OS" == "mingw"* || "$OS" == "cygwin" ]]; then
     if [[ "$SHELL" == *"pwsh"* || "$SHELL" == *"powershell"* ]]; then
         ACTIVATE_CMD=".venv\\Scripts\\Activate.ps1"
-        RUN_PYTHON="Start-Process python main.py"
-        RUN_STREAMLIT="Start-Process streamlit -ArgumentList 'run app.py'"
+        RUN_PYTHON="Start-Process python backend\\main.py"
+        RUN_STREAMLIT="Start-Process streamlit -ArgumentList 'run frontend\\app.py'"
     else
         ACTIVATE_CMD="source .venv/Scripts/activate"
-        RUN_PYTHON="start python main.py"
-        RUN_STREAMLIT="start streamlit run app.py"
+        RUN_PYTHON="start python backend/main.py"
+        RUN_STREAMLIT="start streamlit run frontend/app.py"
     fi
 elif [[ "$OS" == "darwin" || "$OS" == "linux" ]]; then
     ACTIVATE_CMD=". .venv/bin/activate"
-    RUN_PYTHON="python main.py &"
-    RUN_STREAMLIT="streamlit run app.py"
+    RUN_PYTHON="python backend/main.py &"
+    RUN_STREAMLIT="streamlit run frontend/app.py"
 else
     echo "Unsupported OS: $OS"
     exit 1
