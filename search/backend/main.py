@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from document_loaders import get_loader
 from chunkers import get_chunker
+from embedders import get_embedder
 
 app = Flask(__name__)
 CORS(app, origins='*')
@@ -43,11 +44,23 @@ def chunk_text():
 
 @app.post('/embed-text')
 def embed_text():
-    if 'text' not in request.json:
+    if 'input' not in request.json:
         return jsonify({'error': 'No text provided'}), 400
     
+    if 'embedder' not in request.json:
+        return jsonify({'error': 'No embedder type provided'}), 400
     
-    return jsonify({'embeddings': []}), 200
+    input = request.json['input']
+    embedder_type = request.json['embedder']
+    model_name = request.json.get('model_name')
+    embedder = get_embedder(embedder_type, **{'model_name': model_name} if model_name else {})
+    
+    if embedder is None:
+        return jsonify({'error': 'Unsupported embedder type'}), 400
+    
+    embeddings = embedder(input)
+    
+    return jsonify({'embeddings': embeddings}), 200
 
 
 if __name__ == '__main__':
