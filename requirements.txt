@@ -7,3 +7,4 @@ flask-cors
 azure-storage-blob
 sentence-transformers
 openai
+python-dotenv
