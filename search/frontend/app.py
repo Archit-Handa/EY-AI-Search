@@ -7,6 +7,8 @@ def main():
     st.set_page_config('AI Search - EY')
     st.title('AI Search - EY')
     
+    st.subheader('Step 1: Load document and extract text')
+    
     fetch_option = st.radio(
         label='Choose how to upload file:',
         options=[
@@ -73,6 +75,8 @@ def main():
         with st.expander('**Extracted Text**', expanded=False):
             with st.container(height=300):
                 st.write(f'{st.session_state.extracted_text}')
+        
+        st.subheader('Step 2: Split text into chunks')
         
         chunker_type = st.selectbox(
             label='Select Chunker Type',
