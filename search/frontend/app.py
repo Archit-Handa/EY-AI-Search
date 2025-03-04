@@ -79,13 +79,20 @@ def main():
             options=[
                 'Page',
                 'Paragraph',
+                'Sentence',
                 'Fixed Size'
             ]
         )
         
         chunk_size = None
         if chunker_type == 'Fixed Size':
-            chunk_size = st.number_input('Enter chunk size (in characters)', min_value=50, max_value=2000, value=500, step=50)
+            chunk_size = st.number_input(
+                label='Enter chunk size (in characters)',
+                min_value=50,
+                max_value=2000,
+                value=500,
+                step=50
+            )
         
         col1, col2 = st.columns([0.5, 0.5])
         
