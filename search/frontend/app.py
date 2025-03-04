@@ -15,14 +15,29 @@ def main():
         st.session_state.chunks = None
         
     fetched = option == 'Fetch from Azure'
-    fetcher = get_fetcher("azure" if fetched else "upload")
+    
+    fetcher = get_fetcher('azure' if fetched else 'upload')
     file = fetcher.fetch_document()
     
-    if file is not None and st.session_state.extracted_text is None:
-        st.session_state.extracted_text = extract_file(file, fetched)
+    if file is not None:
+        if st.button('Extract Text'):
+            extracted_text = extract_file(file, fetched)
+            if extracted_text:
+                st.session_state.extracted_text = extracted_text
     
-    if st.session_state.extracted_text and st.session_state.chunks is None:
-        chunk_text(st.session_state.extracted_text)
+    if st.session_state.extracted_text:
+        with st.expander('Extracted Text', expanded=False):
+            st.text_area('Extracted Text:', st.session_state.extracted_text, height=300)
+        
+        chunker_type = st.selectbox('Select Chunker Type', ['Page', 'Paragraph', 'Fixed Size'])
+        
+        if st.button('Chunk Text'):
+            st.session_state.chunks = chunk_text(st.session_state.extracted_text, chunker_type)
+            
+    if st.session_state.chunks:
+        with st.expander('Chunks', expanded=False):
+            st.text_area('Chunks:', '\n\n\n[SEP]\n\n\n'.join(st.session_state.chunks), height=300)
+
 
 if __name__ == '__main__':
     main()
