@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from document_loaders import get_loader
+from chunkers import get_chunker
 
 app = Flask(__name__)
 CORS(app, origins='*')
 
-@app.route('/extract-text', methods=['POST'])
+@app.post('/extract-text')
 def extract_text():
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
@@ -19,6 +20,26 @@ def extract_text():
     extracted_text = doc_loader.load(file)
     
     return jsonify({'extracted_text': extracted_text}), 200
+
+@app.post('/chunk-text')
+def chunk_text():
+    if 'text' not in request.json:
+        return jsonify({'error': 'No text provided'}), 400
+    
+    if 'type' not in request.json:
+        return jsonify({'error': 'No chunker type provided'}), 400
+    
+    text = request.json['text']
+    chunker_type = request.json['type']
+    chunk_size = request.json.get('chunk_size', 200)
+    chunker = get_chunker(chunker_type, **{'chunk_size': chunk_size})
+    
+    if chunker is None:
+        return jsonify({'error': 'Unsupported chunker type'}), 400
+    
+    chunks = chunker.chunk(text)
+    
+    return jsonify({'chunks': list(chunks)}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

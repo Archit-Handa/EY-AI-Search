@@ -1,5 +1,10 @@
 #!/bin/bash
 
+export STREAMLIT_THEME_BASE="dark"
+export STREAMLIT_THEME_PRIMARY_COLOR="#e4a800"
+export STREAMLIT_THEME_TEXT_COLOR="#ffffff"
+
+
 cd search
 
 # Detect OS

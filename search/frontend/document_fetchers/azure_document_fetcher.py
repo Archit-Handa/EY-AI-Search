@@ -26,8 +26,9 @@ class AzureDocumentFetcher(DocumentFetcher):
             blob_list = [blob.name for blob in container_client.list_blobs()]
             filename = st.selectbox("Choose a file from Azure Blob Storage:", blob_list)
             
-            blob_client = container_client.get_blob_client(filename)
-            blob_stream = BytesIO(blob_client.download_blob().readall())
+            if filename:
+                blob_client = container_client.get_blob_client(filename)
+                blob_stream = BytesIO(blob_client.download_blob().readall())
             
             return filename, blob_stream
         
