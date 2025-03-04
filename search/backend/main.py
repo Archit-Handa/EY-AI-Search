@@ -41,5 +41,14 @@ def chunk_text():
     
     return jsonify({'chunks': list(chunks)}), 200
 
+@app.post('/embed-text')
+def embed_text():
+    if 'text' not in request.json:
+        return jsonify({'error': 'No text provided'}), 400
+    
+    
+    return jsonify({'embeddings': []}), 200
+
+
 if __name__ == '__main__':
     app.run(debug=True)
