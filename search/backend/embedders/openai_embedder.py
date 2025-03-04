@@ -1,6 +1,9 @@
 from .base import Embedder
 import openai
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class OpenAIEmbedder(Embedder):
     def __init__(self, model_name: str='text-embedding-ada-002'):
