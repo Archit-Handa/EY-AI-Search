@@ -3,11 +3,12 @@ import requests
 
 BACKEND_URL_PATH = 'http://127.0.0.1:5000'
 
-def chunk_text(text, chunker_type='page'):
+def chunk_text(text, chunker_type='page', **kwargs):
     try:
         request_body = {
             'text': text,
-            'type': chunker_type.replace(' ', '_').lower()
+            'type': chunker_type.replace(' ', '_').lower(),
+            **kwargs
         }
         response = requests.post(f'{BACKEND_URL_PATH}/chunk-text', json=request_body)
         

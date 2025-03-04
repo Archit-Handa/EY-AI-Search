@@ -43,8 +43,12 @@ def main():
                 
                 with st.spinner('Extracting Text...'):
                     st.toast('Extracting Text...', icon='⌛')
+                    
                     try:
-                        extracted_text = extract_file(file, fetched)
+                        extracted_text = extract_file(
+                            file=file,
+                            fetched=fetched
+                        )
                         if extracted_text:
                             st.session_state.extracted_text = extracted_text
                             st.toast('Text Extracted Successfully', icon='✅')
@@ -79,6 +83,11 @@ def main():
                 'Fixed Size'
             ]
         )
+        
+        chunk_size = None
+        if chunker_type == 'Fixed Size':
+            chunk_size = st.number_input('Enter chunk size (in characters)', min_value=50, max_value=2000, value=500, step=50)
+        
         col1, col2 = st.columns([0.5, 0.5])
         
         with col1:
@@ -87,7 +96,11 @@ def main():
                 st.session_state.error = None
                 with st.spinner('Chunking Text...'):
                     try:
-                        chunks = chunk_text(st.session_state.extracted_text, chunker_type)
+                        chunks = chunk_text(
+                            text=st.session_state.extracted_text,
+                            chunker_type=chunker_type,
+                            **{'chunk_size': chunk_size}
+                        )
                         if chunks:
                             st.session_state.chunks = chunks
                             st.toast('Text Chunked Successfully', icon='✅')

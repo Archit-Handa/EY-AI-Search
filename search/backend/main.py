@@ -31,7 +31,8 @@ def chunk_text():
     
     text = request.json['text']
     chunker_type = request.json['type']
-    chunker = get_chunker(chunker_type)
+    chunk_size = request.json.get('chunk_size', 200)
+    chunker = get_chunker(chunker_type, **{'chunk_size': chunk_size})
     
     if chunker is None:
         return jsonify({'error': 'Unsupported chunker type'}), 400
