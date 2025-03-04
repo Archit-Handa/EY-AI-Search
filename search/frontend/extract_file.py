@@ -5,6 +5,8 @@ BACKEND_URL_PATH = 'http://127.0.0.1:5000'
 
 def extract_file(file, fetched=False):
     extract_button = st.empty()
+    extracted_text = None
+    
     if extract_button.button('Extract Text'):
         with st.status('Extracting Text...', expanded=True) as status:
             files = {'file': (file.name, file.getvalue())} if not fetched \
@@ -20,3 +22,5 @@ def extract_file(file, fetched=False):
             else:
                 status.update(label='Failed to extract text', state='error')
                 st.error('Failed to extract text.')
+    
+    return extracted_text

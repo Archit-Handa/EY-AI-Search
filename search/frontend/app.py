@@ -9,16 +9,20 @@ def main():
     
     option = st.radio('Choose how to upload file:', ('Upload a file', 'Fetch from Azure'))
     
-    fetched = True
-    if option == 'Upload a file':
-        fetcher = get_fetcher('upload')
-        fetched = False
-    elif option == 'Fetch from Azure':
-        fetcher = get_fetcher('azure')
-    
+    if 'extracted_text' not in st.session_state:
+        st.session_state.extracted_text = None
+    if 'chunks' not in st.session_state:
+        st.session_state.chunks = None
+        
+    fetched = option == 'Fetch from Azure'
+    fetcher = get_fetcher("azure" if fetched else "upload")
     file = fetcher.fetch_document()
     
-    if file is not None: extract_file(file, fetched)
+    if file is not None and st.session_state.extracted_text is None:
+        st.session_state.extracted_text = extract_file(file, fetched)
+    
+    if st.session_state.extracted_text and st.session_state.chunks is None:
+        chunk_text(st.session_state.extracted_text)
 
 if __name__ == '__main__':
     main()
