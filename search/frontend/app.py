@@ -7,7 +7,13 @@ def main():
     st.set_page_config('AI Search - EY')
     st.title('AI Search - EY')
     
-    option = st.radio('Choose how to upload file:', ('Upload a file', 'Fetch from Azure'))
+    fetch_option = st.radio(
+        label='Choose how to upload file:',
+        options=[
+            'Upload a file',
+            'Fetch from Azure'
+        ]
+    )
     
     if 'extracted_text' not in st.session_state:
         st.session_state.extracted_text = None
@@ -18,7 +24,7 @@ def main():
     if 'error' not in st.session_state:
         st.session_state.error = None
         
-    fetched = option == 'Fetch from Azure'
+    fetched = fetch_option == 'Fetch from Azure'
     
     fetcher = get_fetcher('azure' if fetched else 'upload')
     file = fetcher.fetch_document()
@@ -27,7 +33,11 @@ def main():
         col1, col2 = st.columns([0.5, 0.5])
         
         with col1:
-            if st.button('Extract Text', disabled=st.session_state.loading, icon='📤'):
+            if st.button(
+                label='Extract Text',
+                disabled=st.session_state.loading,
+                icon='📤'
+            ):
                 st.session_state.loading = True
                 st.session_state.error = None
                 
@@ -61,7 +71,14 @@ def main():
             with st.container(height=300):
                 st.write(f'{st.session_state.extracted_text}')
         
-        chunker_type = st.selectbox('Select Chunker Type', ['Page', 'Paragraph', 'Fixed Size'])
+        chunker_type = st.selectbox(
+            label='Select Chunker Type',
+            options=[
+                'Page',
+                'Paragraph',
+                'Fixed Size'
+            ]
+        )
         col1, col2 = st.columns([0.5, 0.5])
         
         with col1:
