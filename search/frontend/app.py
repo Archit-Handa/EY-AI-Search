@@ -13,6 +13,10 @@ def main():
         st.session_state.extracted_text = None
     if 'chunks' not in st.session_state:
         st.session_state.chunks = None
+    if 'loading' not in st.session_state:
+        st.session_state.loading = False
+    if 'error' not in st.session_state:
+        st.session_state.error = None
         
     fetched = option == 'Fetch from Azure'
     
@@ -20,23 +24,80 @@ def main():
     file = fetcher.fetch_document()
     
     if file is not None:
-        if st.button('Extract Text'):
-            extracted_text = extract_file(file, fetched)
-            if extracted_text:
-                st.session_state.extracted_text = extracted_text
+        col1, col2 = st.columns([0.5, 0.5])
+        
+        with col1:
+            if st.button('Extract Text', disabled=st.session_state.loading, icon='📤'):
+                st.session_state.loading = True
+                st.session_state.error = None
+                
+                with st.spinner('Extracting Text...'):
+                    st.toast('Extracting Text...', icon='⌛')
+                    try:
+                        extracted_text = extract_file(file, fetched)
+                        if extracted_text:
+                            st.session_state.extracted_text = extracted_text
+                            st.toast('Text Extracted Successfully', icon='✅')
+                        else:
+                            raise ValueError('No text could be extracted')
+                    
+                    except Exception as e:
+                        st.session_state.error = str(e)
+                        st.toast('Extraction Failed', icon='❌')
+                    
+                    finally:
+                        st.session_state.loading = False
+                    
+        with col2:
+            if st.session_state.extracted_text and not st.session_state.error:
+                # st.success('✅ Text Extracted')
+                pass
+            
+            elif st.session_state.error:
+                st.error(f'❌ {st.session_state.error}')
     
     if st.session_state.extracted_text:
-        with st.expander('Extracted Text', expanded=False):
-            st.text_area('Extracted Text:', st.session_state.extracted_text, height=300)
+        with st.expander('**Extracted Text**', expanded=False):
+            with st.container(height=300):
+                st.write(f'{st.session_state.extracted_text}')
         
         chunker_type = st.selectbox('Select Chunker Type', ['Page', 'Paragraph', 'Fixed Size'])
+        col1, col2 = st.columns([0.5, 0.5])
         
-        if st.button('Chunk Text'):
-            st.session_state.chunks = chunk_text(st.session_state.extracted_text, chunker_type)
+        with col1:
+            if st.button('Chunk Text', icon='✂️'):
+                st.session_state.loading = True
+                st.session_state.error = None
+                with st.spinner('Chunking Text...'):
+                    try:
+                        chunks = chunk_text(st.session_state.extracted_text, chunker_type)
+                        if chunks:
+                            st.session_state.chunks = chunks
+                            st.toast('Text Chunked Successfully', icon='✅')
+                        else:
+                            raise ValueError('No chunks were generated')
+                    
+                    except Exception as e:
+                        st.session_state.error = str(e)
+                        st.toast('Extraction Failed', icon='❌')
+                    
+                    finally:
+                        st.session_state.loading = False
+        
+        with col2:
+            if st.session_state.chunks and not st.session_state.error:
+                # st.success('✅ Text Chunked')
+                pass
             
-    if st.session_state.chunks:
-        with st.expander('Chunks', expanded=False):
-            st.text_area('Chunks:', '\n\n\n[SEP]\n\n\n'.join(st.session_state.chunks), height=300)
+            elif st.session_state.error:
+                st.error(f'❌ {st.session_state.error}')
+        
+        if st.session_state.chunks:
+            with st.expander('**Chunks**', expanded=False):
+                with st.container(height=300):
+                    for i, chunk in enumerate(st.session_state.chunks):
+                        with st.chat_message('Chunks', avatar='✂️'):
+                            st.write(f'**Chunk {i+1}:** {chunk}')
 
 
 if __name__ == '__main__':
