@@ -6,4 +6,4 @@ class ParagraphChunker(Chunker):
     
     def chunk(self, text: str) -> Generator[str, None, None]:
         for para in text.split('\n'):
-            yield para
+            if para != '': yield para
