@@ -5,3 +5,5 @@ python-docx
 flask
 flask-cors
 azure-storage-blob
+sentence-transformers
+openai
