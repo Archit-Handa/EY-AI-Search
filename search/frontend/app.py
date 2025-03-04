@@ -38,12 +38,11 @@ def main():
                 disabled=st.session_state.loading,
                 icon='📤'
             ):
+                st.toast('Extracting Text...', icon='⌛')
                 st.session_state.loading = True
                 st.session_state.error = None
                 
                 with st.spinner('Extracting Text...'):
-                    st.toast('Extracting Text...', icon='⌛')
-                    
                     try:
                         extracted_text = extract_file(
                             file=file,
@@ -91,9 +90,15 @@ def main():
         col1, col2 = st.columns([0.5, 0.5])
         
         with col1:
-            if st.button('Chunk Text', icon='✂️'):
+            if st.button(
+                label='Chunk Text',
+                disabled=st.session_state.loading,
+                icon='✂️'
+            ):
+                st.toast('Chunking Text...', icon='⌛')
                 st.session_state.loading = True
                 st.session_state.error = None
+                
                 with st.spinner('Chunking Text...'):
                     try:
                         chunks = chunk_text(
