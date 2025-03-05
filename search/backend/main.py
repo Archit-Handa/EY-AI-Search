@@ -52,7 +52,7 @@ def embed_text():
     
     input = request.json['input']
     embedder_type = request.json['embedder']
-    model_name = request.json.get('model_name')
+    model_name = request.json.get('model')
     embedder = get_embedder(embedder_type, **{'model_name': model_name} if model_name else {})
     
     if embedder is None:
