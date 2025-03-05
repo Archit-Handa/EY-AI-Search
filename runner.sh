@@ -38,7 +38,7 @@ fi
 eval "$ACTIVATE_CMD"
 
 pip install --upgrade pip --quiet
-pip install -r ../requirements.txt --quiet
+pip install --upgrade -r ../requirements.txt --quiet
 
 # Run Python scripts
 eval "$RUN_PYTHON" &
