@@ -174,22 +174,22 @@ def main():
             embedder_name = st.selectbox(
                 label='Select Embedder',
                 options=[
-                    'OpenAI',
-                    'SBert'
+                    'SBert',
+                    'OpenAI'
                 ]
             )
             
             model_dict = {
-                'OpenAI': [
-                    'text-embedding-ada-002',
-                    'text-embedding-3-small',
-                    'text-embedding-3-large',
-                    'Other Model'
-                ],
                 'SBert': [
                     'all-MiniLM-L6-v2',
                     'all-mpnet-base-v2',
                     'multi-qa-MiniLM-L6-cos-v1'
+                    'Other Model'
+                ],
+                'OpenAI': [
+                    'text-embedding-ada-002',
+                    'text-embedding-3-small',
+                    'text-embedding-3-large',
                     'Other Model'
                 ]
             }
