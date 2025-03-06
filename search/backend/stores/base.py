@@ -33,6 +33,10 @@ class Store(ABC):
         pass
     
     @abstractmethod
+    def clear(self) -> None:
+        pass
+    
+    @abstractmethod
     def search(self, query_vector: list[float], top_k: int) -> list[dict]:
         '''
         Search for a query in the store

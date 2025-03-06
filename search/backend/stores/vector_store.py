@@ -14,17 +14,51 @@ class VectorStore(Store):
         self.db = self.client[os.getenv('COSMOSDB_DATABASE_NAME')]
         self.collection = self.db['embeddings']
     
-    def add(self, embeddings: list[list[float]], metadatas: list[dict]):
-        pass
+    def add(self, documents: list[dict]) -> None:
+        for doc in documents:
+            doc['id'] = str(uuid.uuid4())
+            doc.setdefault('metadata', {})
+            
+        self.collection.create_indexes([
+            {
+                'name': 'vector_index',
+                'key': [('vector', 'vector')],
+                'type': 'vectorSearch',
+                'similarity': 'cosine',
+                'algorihtm': 'HNSW'
+            }
+        ])
+        
+        self.collection.insert_many(documents)
     
-    def get(self, key: str):
-        pass
+    def get(self, doc_id: str) -> dict:
+        return self.collection.find_one({'id': doc_id}, {'_id': 0})
     
-    def delete(self, key: str):
-        pass
+    def delete(self, doc_id: str) -> None:
+        self.collection.delete_one({'id': doc_id})
+        
+    def clear(self) -> None:
+        self.collection.delete_many({})
     
-    def search(self, query: str, k: int):
-        pass
+    def search(self, query_vector: list[float], top_k: int) -> list[dict]:
+        pipeline = [
+            {
+                '$vectorSearch': {
+                    'index': 'vector_index',
+                    'path': 'vector',
+                    'queryVector': query_vector,
+                    'numCandidates': 100,
+                    'limit': top_k
+                }
+            },
+            {
+                '$project': {
+                    {'_id': 0}
+                }
+            }
+        ]
+        
+        return list(self.collection.aggregate(pipeline))
     
-    def close(self):
-        pass
+    def close(self) -> None:
+        self.client.close()
