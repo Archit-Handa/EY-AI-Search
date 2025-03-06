@@ -3,6 +3,7 @@ from flask_cors import CORS
 from document_loaders import get_loader
 from chunkers import get_chunker
 from embedders import get_embedder
+from stores import get_store
 
 app = Flask(__name__)
 CORS(app, origins='*')
@@ -62,6 +63,9 @@ def embed_text():
     
     return jsonify({'embeddings': embeddings}), 200
 
+@app.post('/store-embeddings')
+def store_embeddings():
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
