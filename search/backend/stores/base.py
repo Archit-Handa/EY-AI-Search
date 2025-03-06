@@ -4,7 +4,7 @@ class Store(ABC):
     '''Base class for a store'''
     
     @abstractmethod
-    def add(self, key: str, value: str) -> None:
+    def add(self, documents: list[dict]) -> None:
         '''
         Add a key-value pair to the store
         
@@ -14,7 +14,7 @@ class Store(ABC):
         pass
     
     @abstractmethod
-    def get(self, key: str) -> str:
+    def get(self, doc_id: str) -> dict:
         '''
         Get a value from the store
         
@@ -24,7 +24,7 @@ class Store(ABC):
         pass
     
     @abstractmethod
-    def delete(self, key: str) -> None:
+    def delete(self, doc_id: str) -> None:
         '''
         Delete a key from the store
         
@@ -33,7 +33,7 @@ class Store(ABC):
         pass
     
     @abstractmethod
-    def search(self, query: str, top_k: int) -> list[str]:
+    def search(self, query_vector: list[float], top_k: int) -> list[dict]:
         '''
         Search for a query in the store
         
