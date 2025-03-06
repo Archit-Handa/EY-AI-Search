@@ -14,20 +14,26 @@ class VectorStore(Store):
         self.db = self.client[os.getenv('COSMOSDB_DATABASE_NAME')]
         self.collection = self.db['embeddings']
     
+        self._ensure_hnsw_index()
+        
+    def _ensure_hnsw_index(self) -> None:
+        indexes = self.collection.index_information()
+        if 'vector_index' not in indexes:
+            self.collection.create_indexes([
+                {
+                    'name': 'vector_index',
+                    'key': [('vector', 'vector')],
+                    'type': 'vectorSearch',
+                    'similarity': 'cosine',
+                    'algorihtm': 'HNSW'
+                }
+            ])
+
     def add(self, documents: list[dict]) -> None:
         for doc in documents:
             doc['id'] = str(uuid.uuid4())
             doc.setdefault('metadata', {})
             
-        self.collection.create_indexes([
-            {
-                'name': 'vector_index',
-                'key': [('vector', 'vector')],
-                'type': 'vectorSearch',
-                'similarity': 'cosine',
-                'algorihtm': 'HNSW'
-            }
-        ])
         
         self.collection.insert_many(documents)
     
