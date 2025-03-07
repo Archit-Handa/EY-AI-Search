@@ -65,7 +65,26 @@ def embed_text():
 
 @app.post('/store-embeddings')
 def store_embeddings():
+    if 'embeddings' not in request.json:
+        return jsonify({'error': 'No embeddings provided'}), 400
     
+    if 'contents' not in request.json:
+        return jsonify({'error': 'No contents provided'}), 400
+    
+    embeddings = request.json['embeddings']
+    contents = request.json['contents']
+    title = request.json.get('title', 'Untitled')
+    
+    vector_store = get_store('vector')
+    vector_store.add([
+        {
+            'content': content,
+            'vector': embedding,
+            'title': title
+        } for embedding, content in zip(embeddings, contents)
+    ])
+    
+    return jsonify({'message': 'Successfully stored embeddings'}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

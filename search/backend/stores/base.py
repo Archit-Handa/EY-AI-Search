@@ -34,6 +34,7 @@ class Store(ABC):
     
     @abstractmethod
     def clear(self) -> None:
+        '''Clear the store'''
         pass
     
     @abstractmethod
