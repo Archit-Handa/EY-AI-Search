@@ -43,7 +43,7 @@ To run the application, execute the following command:
 bash runner.sh
 ```
 
-Once the application is running, you can visit [http://localhost:8501](http://localhost:8501) to use the application on a Streamlit interface.
+Once the application is running, you can visit [http://localhost:8501](http://localhost:8501) to use the application on a Streamlit interface. The Flask Backend runs on [http://localhost:5000](http://localhost:5000)
 
 ---
 
