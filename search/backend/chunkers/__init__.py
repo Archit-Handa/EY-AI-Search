@@ -4,16 +4,18 @@ from .paragraph_chunker import ParagraphChunker
 from .sentence_chunker import SentenceChunker
 from .fixed_size_chunker import FixedSizeChunker
 
-def get_chunker(type: str, **kwargs) -> Chunker:
-    if type == 'page':
-        return PageChunker()
-    elif type == 'paragraph':
-        return ParagraphChunker()
-    elif type == 'sentence':
-        return SentenceChunker()
-    elif type == 'fixed_size':
-        return FixedSizeChunker(**kwargs)
-    else:
+_chunkers = {
+    'page': PageChunker,
+    'paragraph': ParagraphChunker,
+    'sentence': SentenceChunker,
+    'fixed_size': FixedSizeChunker
+}
+
+def get_chunker(chunker_type: str, **kwargs) -> Chunker:
+    try:
+        return _chunkers[chunker_type.lower()](**kwargs)
+    
+    except KeyError:
         raise ValueError(f'Unknown chunker type: {type}')
 
 __all__ = ['get_chunker']
