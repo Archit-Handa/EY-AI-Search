@@ -20,15 +20,23 @@ class VectorStore(Store):
     def _ensure_hnsw_index(self) -> None:
         indexes = self.collection.index_information()
         if 'vector_index' not in indexes:
-            self.collection.create_indexes([
-                {
-                    'name': 'vector_index',
-                    'key': [('vector', 'vector')],
-                    'type': 'vectorSearch',
-                    'similarity': 'cosine',
-                    'algorihtm': 'HNSW'
-                }
-            ])
+            # self.collection.create_indexes([
+            #     {
+            #         'name': 'vector_index',
+            #         'key': [('vector', 'vector')],
+            #         'type': 'vectorSearch',
+            #         'similarity': 'cosine',
+            #         'algorithm': 'HNSW'
+            #     }
+            # ])
+            
+            self.collection.create_index({
+                'name': 'vector_index',
+                'key': [('vector', 'vector')],
+                'type': 'vectorSearch',
+                'similarity': 'cosine',
+                'algorithm': 'HNSW'
+            })
 
     def add(self, documents: list[dict]) -> None:
         for doc in documents:
