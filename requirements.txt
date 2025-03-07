@@ -9,3 +9,5 @@ sentence-transformers
 openai
 python-dotenv
 numpy<2
+pymongo
+uuid
