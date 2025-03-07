@@ -9,7 +9,7 @@ load_dotenv()
 class VectorStore(Store):
     '''Vector Store that uses CosmosDB (MongoDB for Azure) to store embeddings'''
     
-    # FIXME: Need to fix the issue of connection between MongoClient and CosmosDB
+    # FIXME: Need to fix creation of index
     def __init__(self):
         self.client = pymongo.MongoClient(os.getenv('COSMOSDB_CONNECTION_STRING'))
         self.db = self.client[os.getenv('COSMOSDB_DATABASE_NAME')]
