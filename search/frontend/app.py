@@ -253,7 +253,7 @@ def main():
                     for i, embedding in enumerate(st.session_state.embeddings[:5]):
                         formatted_embedding = f'**Embedding {i+1}:**&emsp;`[{", ".join(f"{x:+.4f}" for x in embedding[:5]).replace("+", " ")} ...]`'
                         st.markdown(formatted_embedding, unsafe_allow_html=True)
-                    st.markdown('...')
+                    if len(st.session_state.embeddings) > 5: st.markdown('...')
 
 
 if __name__ == '__main__':
