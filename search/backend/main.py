@@ -105,15 +105,84 @@ def store_embeddings():
     
     return jsonify({'message': 'Successfully stored embeddings'}), 200
 
-# TODO: Implement Query API Endpoint
+# TODO: Implement certain aspects of the Query API Endpoint
 @app.post('/query')
 def query():
-    pass
+    if 'query' not in request.json:
+        return jsonify({'error': 'No query provided'}), 400
+    
+    if 'embedder' not in request.json:
+        return jsonify({'error': 'No embedder type provided'}), 400
+    
+    if 'k' not in request.json:
+        return jsonify({'error': 'No k value provided'}), 400
+    
+    query = request.json['query']
+    embedder_type = request.json['embedder']
+    model_name = request.json.get('model')
+    top_k = request.json['k']
+    
+    semantic_search_request_body = {
+        'query': query,
+        'embedder': embedder_type,
+        'model': model_name,
+        'k': top_k
+    }
+    semantic_search_response = requests.post(f'{BACKEND_URL_PATH}/semantic-search', json=semantic_search_request_body)
+    
+    if semantic_search_response.status_code == 200:
+        semantic_search_results = semantic_search_response.json()['results']
+    else:
+        return semantic_search_response.json()['error'], 400
+    
+    # TODO: Integrate Full-text Search API Endpoint
+    
+    # TODO: Integrate RRF API Endpoint
+    
+    # TODO: Integrate Cross-Encoder Reranking API Endpoint
+    
+    # FIXME: For now, just forwarding semantic search results
+    return jsonify({'results': semantic_search_results}), 200
 
-# TODO: Implement Semantic Search API Endpoint
 @app.post('/semantic-search')
 def semantic_search():
-    pass
+    if 'query' not in request.json:
+        return jsonify({'error': 'No query provided'}), 400
+    
+    if 'embedder' not in request.json:
+        return jsonify({'error': 'No embedder type provided'}), 400
+    
+    if 'k' not in request.json:
+        return jsonify({'error': 'No k value provided'}), 400
+    
+    query = request.json['query']
+    embedder_type = request.json['embedder']
+    model_name = request.json.get('model')
+    top_k = request.json['k']
+    
+    embedder = get_embedder(embedder_type, **{'model_name': model_name} if model_name else {})
+    
+    if embedder is None:
+        return jsonify({'error': 'Unsupported embedder type'}), 400
+    
+    query_vector = embedder(query)
+    
+    query = request.json['query']
+    vector_store = get_store('vector')
+    results = vector_store.search(query_vector, top_k=top_k)
+    
+    return jsonify({
+        'results': [
+            {
+                'id': result['document']['id'],
+                'title': result['document']['title'],
+                'content': result['document']['content'],
+                'metadata': result['document']['metadata'],
+                # 'vector': result['document']['vector'],
+                'score': result['similarityScore']
+            } for result in results
+        ]
+    }), 200
 
 # TODO: Implement Full-text Search API Endpoint
 @app.post('/full-text-search')
