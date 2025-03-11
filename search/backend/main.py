@@ -105,5 +105,20 @@ def store_embeddings():
     
     return jsonify({'message': 'Successfully stored embeddings'}), 200
 
+# TODO: Implement Query API Endpoint
+@app.post('/query')
+def query():
+    pass
+
+# TODO: Implement Semantic Search API Endpoint
+@app.post('/semantic-search')
+def semantic_search():
+    pass
+
+# TODO: Implement Full-text Search API Endpoint
+@app.post('/full-text-search')
+def full_text_search():
+    pass
+
 if __name__ == '__main__':
     app.run(debug=True)
