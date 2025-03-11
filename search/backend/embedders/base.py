@@ -15,7 +15,7 @@ class Embedder(ABC):
             return []
         
         if isinstance(input, str):
-            return self._embed([input])[0].tolist()
+            return self._embed([input])[0]
         elif isinstance(input, list) and all(isinstance(item, str) for item in input):
             embeddings = self._embed(input)
             return [x.tolist() for x in embeddings] if not isinstance(embeddings[0], list) else embeddings
