@@ -105,7 +105,6 @@ def store_embeddings():
     
     return jsonify({'message': 'Successfully stored embeddings'}), 200
 
-# TODO: Implement certain aspects of the Query API Endpoint
 @app.post('/query')
 def query():
     if 'query' not in request.json:
