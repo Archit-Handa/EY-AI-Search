@@ -307,7 +307,7 @@ def main():
                                     st.write(result['content'])
                                     st.write(f'**:primary[Title:]** {result["title"]}')
                                     st.write(f'**:primary[Score:]** {result["score"]:.4f}')
-                                    st.write('---')
+                                    if i < len(st.session_state.results) - 1: st.write('---') 
 
 
 if __name__ == '__main__':
