@@ -3,17 +3,18 @@ import requests
 
 BACKEND_URL_PATH = 'http://127.0.0.1:5000'
 
-def generate_embeddings(input, embedder, model):
+def generate_chunk_embeddings(chunks, title, embedder, model):
     try:
         request_body = {
-            'input': input,
+            'chunks': chunks,
+            'title': title,
             'embedder': embedder
         }
         
         if model:
             request_body['model'] = model
             
-        response = requests.post(f'{BACKEND_URL_PATH}/embed-text', json=request_body)
+        response = requests.post(f'{BACKEND_URL_PATH}/embed-chunks', json=request_body)
         
         if response.status_code == 200:
             return response.json().get('embeddings', [])
