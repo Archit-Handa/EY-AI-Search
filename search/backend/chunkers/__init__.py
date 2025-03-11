@@ -1,3 +1,4 @@
+import inspect
 from .base import Chunker
 from .page_chunker import PageChunker
 from .paragraph_chunker import ParagraphChunker
@@ -12,10 +13,12 @@ _chunkers = {
 }
 
 def get_chunker(chunker_type: str, **kwargs) -> Chunker:
-    try:
-        return _chunkers[chunker_type.lower()](**kwargs)
+    chunker = _chunkers.get(chunker_type.lower())
     
-    except KeyError:
-        raise ValueError(f'Unknown chunker type: {type}')
+    if chunker is None:
+        raise ValueError(f'Unknown chunker type: {chunker_type}')
+    
+    return chunker(**kwargs) if inspect.signature(chunker).parameters else chunker()
+
 
 __all__ = ['get_chunker']
