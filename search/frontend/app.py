@@ -253,7 +253,7 @@ def main():
                         st.markdown(formatted_embedding, unsafe_allow_html=True)
                     if len(st.session_state.embeddings) > 5: st.markdown('...')
                     
-                st.subheader("Step 4: Semantic Search")
+                st.subheader("Step 4: Search query")
                 st.session_state.query = st.text_input("Enter your search query:")
                 st.session_state.top_k = st.slider("Number of results", 1, 10, 3)
 
@@ -285,14 +285,14 @@ def main():
                             
                             except Exception as e:
                                 st.session_state.error = str(e)
-                                st.toast('Embedding Failed', icon='❌')
+                                st.toast('Search Failed', icon='❌')
                             
                             finally:
                                 st.session_state.loading = False
                 
                 with col2:
                     if st.session_state.results and not st.session_state.error:
-                        # st.success('✅ Chunks Embedded')
+                        # st.success('✅ Query searched')
                         pass
                     
                     elif st.session_state.error:
