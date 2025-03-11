@@ -9,12 +9,12 @@ load_dotenv()
 class VectorStore(Store):
     '''Vector Store that uses CosmosDB (MongoDB for Azure) to store embeddings'''
     
-    def __init__(self):
+    def __init__(self, index_type: str='IVF'):
         self.client = pymongo.MongoClient(os.getenv('COSMOSDB_CONNECTION_STRING'))
         self.db = self.client[os.getenv('COSMOSDB_DATABASE_NAME')]
         self.collection = self.db['embeddings']
     
-        self._ensure_index(index_type='IVF')
+        self._ensure_index(index_type=index_type)
         
     def _ensure_index(self, index_type: str='IVF') -> None:
         indexes = self.collection.index_information()
@@ -98,21 +98,25 @@ class VectorStore(Store):
     def search(self, query_vector: list[float], top_k: int) -> list[dict]:
         pipeline = [
             {
-                '$vectorSearch': {
-                    'index': 'vector_index',
-                    'path': 'vector',
-                    'queryVector': query_vector,
-                    'numCandidates': 100,
-                    'limit': top_k
+                '$search': {
+                    'cosmosSearch': {
+                        'vector': query_vector,
+                        'path': 'vector',
+                        'k': top_k
+                    },
+                    'returnStoredSource': True
                 }
             },
             {
                 '$project': {
-                    '_id': 0
+                    'similarityScore': {
+                        '$meta': 'searchScore'
+                    },
+                    'document' : '$$ROOT'
                 }
             }
         ]
-        
+            
         return list(self.collection.aggregate(pipeline))
     
     def close(self) -> None:
