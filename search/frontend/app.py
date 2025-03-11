@@ -3,29 +3,31 @@ from document_fetchers import get_fetcher
 from extract_file import extract_file
 from chunk_text import chunk_text
 from generate_embeddings import generate_chunk_embeddings
+from query import query
 
 def _set_session_state(reset=False):
-    if reset:
-        st.session_state.extracted_text = None
-        st.session_state.title = None
-        st.session_state.chunks = None
-        st.session_state.embeddings = None
-        st.session_state.loading = False
-        st.session_state.error = None
+    session_state_vars = [
+        'extracted_text',
+        'title',
+        'chunks',
+        'embedder_name',
+        'model_name',
+        'embeddings',
+        'loading',
+        'error',
+        'query',
+        'top_k',
+        'results'
+    ]
     
-    else:
-        if 'title' not in st.session_state:
-            st.session_state.title = None
-        if 'extracted_text' not in st.session_state:
-            st.session_state.extracted_text = None
-        if 'chunks' not in st.session_state:
-            st.session_state.chunks = None
-        if 'embeddings' not in st.session_state:
-            st.session_state.embeddings = None
-        if 'loading' not in st.session_state:
-            st.session_state.loading = False
-        if 'error' not in st.session_state:
-            st.session_state.error = None
+    if reset:
+        for var in session_state_vars:
+            if var in st.session_state:
+                del st.session_state[var]
+    
+    for var in session_state_vars:
+        if var not in st.session_state:
+            st.session_state[var] = None if var != 'loading' else False
 
 def main():
     st.set_page_config('AI Search - EY')
@@ -41,16 +43,6 @@ def main():
         ]
     )
     
-    # if 'extracted_text' not in st.session_state:
-    #     st.session_state.extracted_text = None
-    # if 'chunks' not in st.session_state:
-    #     st.session_state.chunks = None
-    # if 'embeddings' not in st.session_state:
-    #     st.session_state.embeddings = None
-    # if 'loading' not in st.session_state:
-    #     st.session_state.loading = False
-    # if 'error' not in st.session_state:
-    #     st.session_state.error = None
     _set_session_state()
         
     fetched = fetch_option == 'Fetch from Azure'
@@ -176,7 +168,7 @@ def main():
                             
             st.subheader('Step 3: Generate chunk embeddings')
             
-            embedder_name = st.selectbox(
+            st.session_state.embedder_name = st.selectbox(
                 label='Select Embedder',
                 options=[
                     'SBert',
@@ -199,19 +191,19 @@ def main():
                 ]
             }
             
-            if embedder_name in model_dict:
+            if st.session_state.embedder_name in model_dict:
                 model_choice = st.selectbox(
                     label='Select Model',
-                    options=model_dict[embedder_name]
+                    options=model_dict[st.session_state.embedder_name]
                 )
             
-                model_name = st.text_input(
+                st.session_state.model_name = st.text_input(
                     label='Enter Model Name:',
                     placeholder='e.g. my-model-name'
                 ) if model_choice == 'Other Model' else model_choice
             
             else:
-                model_name = None
+                st.session_state.model_name = None
                 
             col1, col2 = st.columns([0.5, 0.5])
             
@@ -230,8 +222,8 @@ def main():
                             embeddings = generate_chunk_embeddings(
                                 chunks=st.session_state.chunks,
                                 title=st.session_state.title,
-                                embedder=embedder_name,
-                                model=model_name
+                                embedder=st.session_state.embedder_name,
+                                model=st.session_state.model_name
                             )
                             if embeddings:
                                 st.session_state.embeddings = embeddings
@@ -260,6 +252,62 @@ def main():
                         formatted_embedding = f'**Embedding {i+1}:**&emsp;`[{", ".join(f"{x:+.4f}" for x in embedding[:5]).replace("+", " ")} ...]`'
                         st.markdown(formatted_embedding, unsafe_allow_html=True)
                     if len(st.session_state.embeddings) > 5: st.markdown('...')
+                    
+                st.subheader("Step 4: Search query")
+                st.session_state.query = st.text_input("Enter your search query:")
+                st.session_state.top_k = st.slider("Number of results", 1, 10, 3)
+
+                col1, col2 = st.columns([0.5, 0.5])
+                
+                with col1:
+                    if st.button(
+                        label='Search Query',
+                        disabled=st.session_state.loading,
+                        icon='🔍'
+                    ):
+                        st.toast('Searching Query...', icon='⌛')
+                        st.session_state.loading = True
+                        st.session_state.error = None
+                        
+                        with st.spinner('Searching Query...'):
+                            try:
+                                results = query(
+                                    query=st.session_state.query,
+                                    embedder_name=st.session_state.embedder_name,
+                                    model_name=st.session_state.model_name,
+                                    k=st.session_state.top_k
+                                )
+                                if results:
+                                    st.session_state.results = results
+                                    st.toast('Searched Query Successfully', icon='✅')
+                                else:
+                                    raise ValueError('No results were generated')
+                            
+                            except Exception as e:
+                                st.session_state.error = str(e)
+                                st.toast('Search Failed', icon='❌')
+                            
+                            finally:
+                                st.session_state.loading = False
+                
+                with col2:
+                    if st.session_state.results and not st.session_state.error:
+                        # st.success('✅ Query searched')
+                        pass
+                    
+                    elif st.session_state.error:
+                        st.error(f'❌ {st.session_state.error}')
+                        
+                if st.session_state.results:
+                    with st.expander('**Search Results**', expanded=True):
+                        with st.container(height=600):
+                            for i, result in enumerate(st.session_state.results):
+                                with st.chat_message('Search Results', avatar='🔍'):
+                                    st.write(f'##### :primary[Search Result {i+1}]')
+                                    st.write(result['content'])
+                                    st.write(f'**:primary[Title:]** {result["title"]}')
+                                    st.write(f'**:primary[Score:]** {result["score"]:.4f}')
+                                    if i < len(st.session_state.results) - 1: st.write('---') 
 
 
 if __name__ == '__main__':

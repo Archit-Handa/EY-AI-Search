@@ -13,8 +13,6 @@ class VectorStore(Store):
         self.client = pymongo.MongoClient(os.getenv('COSMOSDB_CONNECTION_STRING'))
         self.db = self.client[os.getenv('COSMOSDB_DATABASE_NAME')]
         self.collection = self.db['embeddings']
-        
-        self.clear()
     
         self._ensure_index(index_type=index_type)
         
@@ -96,7 +94,7 @@ class VectorStore(Store):
     def clear(self) -> None:
         self.collection.delete_many({})
     
-    def search(self, query_vector: list[float], top_k: int) -> list[dict]:
+    def search(self, query_vector: list[float], top_k: int=5) -> list[dict]:
         pipeline = [
             {
                 '$search': {
