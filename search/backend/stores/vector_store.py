@@ -10,11 +10,11 @@ class VectorStore(Store):
     '''Vector Store that uses CosmosDB (MongoDB for Azure) to store embeddings'''
     
     def __init__(self, index_type: str='IVF'):
-        self.clear()
-        
         self.client = pymongo.MongoClient(os.getenv('COSMOSDB_CONNECTION_STRING'))
         self.db = self.client[os.getenv('COSMOSDB_DATABASE_NAME')]
         self.collection = self.db['embeddings']
+        
+        self.clear()
     
         self._ensure_index(index_type=index_type)
         
@@ -95,7 +95,6 @@ class VectorStore(Store):
         
     def clear(self) -> None:
         self.collection.delete_many({})
-        self.collection.drop_index('vector_index')
     
     def search(self, query_vector: list[float], top_k: int) -> list[dict]:
         pipeline = [

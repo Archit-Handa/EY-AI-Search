@@ -59,7 +59,7 @@ def main():
     file = fetcher.fetch_document()
     
     if file is not None:
-        st.session_state.title = file.name.split('/')[-1].split('.')[0]
+        st.session_state.title = file.name.split('/')[-1]
         
         col1, col2 = st.columns([0.5, 0.5])
         
