@@ -4,6 +4,9 @@ from document_loaders import get_loader
 from chunkers import get_chunker
 from embedders import get_embedder
 from stores import get_store
+import requests
+
+BACKEND_URL_PATH = 'http://127.0.0.1:5000'
 
 app = Flask(__name__)
 CORS(app, origins='*')
@@ -43,15 +46,19 @@ def chunk_text():
     
     return jsonify({'chunks': list(chunks)}), 200
 
-@app.post('/embed-text')
-def embed_text():
-    if 'input' not in request.json:
+@app.post('/embed-chunks')
+def embed_chunks():
+    if 'chunks' not in request.json:
         return jsonify({'error': 'No text provided'}), 400
+    
+    if 'title' not in request.json:
+        return jsonify({'error': 'No title provided'}), 400
     
     if 'embedder' not in request.json:
         return jsonify({'error': 'No embedder type provided'}), 400
     
-    input = request.json['input']
+    chunks = request.json['chunks']
+    title = request.json['title']
     embedder_type = request.json['embedder']
     model_name = request.json.get('model')
     embedder = get_embedder(embedder_type, **{'model_name': model_name} if model_name else {})
@@ -59,8 +66,20 @@ def embed_text():
     if embedder is None:
         return jsonify({'error': 'Unsupported embedder type'}), 400
     
-    embeddings = embedder(input)
+    embeddings = embedder(chunks)
     
+    request_body = {
+        'contents': chunks,
+        'title': title,
+        'embeddings': embeddings
+    }
+    response = requests.post(f'{BACKEND_URL_PATH}/store-embeddings', json=request_body)
+    
+    if response.status_code == 200:
+        print(response.json()['message'])
+    else:
+        print(response.json()['error'])
+        
     return jsonify({'embeddings': embeddings}), 200
 
 @app.post('/store-embeddings')
@@ -73,7 +92,7 @@ def store_embeddings():
     
     embeddings = request.json['embeddings']
     contents = request.json['contents']
-    title = request.json.get('title', 'Untitled')
+    title = request.json['title']
     
     vector_store = get_store('vector')
     vector_store.add([

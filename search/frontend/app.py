@@ -2,17 +2,20 @@ import streamlit as st
 from document_fetchers import get_fetcher
 from extract_file import extract_file
 from chunk_text import chunk_text
-from generate_embeddings import generate_embeddings
+from generate_embeddings import generate_chunk_embeddings
 
 def _set_session_state(reset=False):
     if reset:
         st.session_state.extracted_text = None
+        st.session_state.title = None
         st.session_state.chunks = None
         st.session_state.embeddings = None
         st.session_state.loading = False
         st.session_state.error = None
     
     else:
+        if 'title' not in st.session_state:
+            st.session_state.title = None
         if 'extracted_text' not in st.session_state:
             st.session_state.extracted_text = None
         if 'chunks' not in st.session_state:
@@ -56,6 +59,8 @@ def main():
     file = fetcher.fetch_document()
     
     if file is not None:
+        st.session_state.title = file.name.split('/')[-1].split('.')[0]
+        
         col1, col2 = st.columns([0.5, 0.5])
         
         with col1:
@@ -222,8 +227,9 @@ def main():
                     
                     with st.spinner('Generating Embeddings...'):
                         try:
-                            embeddings = generate_embeddings(
-                                input=st.session_state.chunks,
+                            embeddings = generate_chunk_embeddings(
+                                chunks=st.session_state.chunks,
+                                title=st.session_state.title,
                                 embedder=embedder_name,
                                 model=model_name
                             )
