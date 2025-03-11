@@ -10,6 +10,8 @@ class VectorStore(Store):
     '''Vector Store that uses CosmosDB (MongoDB for Azure) to store embeddings'''
     
     def __init__(self, index_type: str='IVF'):
+        self.clear()
+        
         self.client = pymongo.MongoClient(os.getenv('COSMOSDB_CONNECTION_STRING'))
         self.db = self.client[os.getenv('COSMOSDB_DATABASE_NAME')]
         self.collection = self.db['embeddings']
