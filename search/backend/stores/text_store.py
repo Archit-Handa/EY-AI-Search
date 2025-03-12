@@ -8,7 +8,7 @@ load_dotenv()
 
 class TextStore(Store):
     def __init__(self):
-        self.client = ElasticSearch(
+        self.client = Elasticsearch(
             os.getenv('ELASTICSEARCH_HOST'),
             api_key=os.getenv('ELASTICSEARCH_API_KEY')
         )
@@ -25,7 +25,9 @@ class TextStore(Store):
                 'analysis': {
                     'analyzer': {
                         'custom_analyzer': {
-                            'type': 'standard',
+                            'type': 'custom',
+                            'tokenizer': 'standard',
+                            'filter': ['lowercase', 'stemmer'],
                             'stopwords': '_english_'
                         }
                     }
@@ -47,7 +49,6 @@ class TextStore(Store):
             print(f'✅ Created Text Index')
         except Exception as e:
             print(f'❌ Error creating text index: {e}')
-        
     
     def add(self, documents: list[dict]) -> None:
         if not documents:
@@ -73,9 +74,10 @@ class TextStore(Store):
     def search(self, query: str, top_k: int=5) -> list[dict]:
         query_body = {
             'query': {
-                'multi_match': {
-                    'query': query,
-                    'fields': ['title', 'content']
+                'match': {
+                    'content': {
+                        'query': query,
+                    }
                 }
             },
             'size': top_k

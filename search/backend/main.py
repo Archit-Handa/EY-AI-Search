@@ -103,6 +103,14 @@ def store_embeddings():
         } for embedding, content in zip(embeddings, contents)
     ])
     
+    text_store = get_store('text')
+    text_store.add([
+        {
+            'content': content,
+            'title': title
+        } for content in contents
+    ])
+    
     return jsonify({'message': 'Successfully stored embeddings'}), 200
 
 @app.post('/query')
@@ -165,8 +173,6 @@ def semantic_search():
         return jsonify({'error': 'Unsupported embedder type'}), 400
     
     query_vector = embedder(query)
-    
-    query = request.json['query']
     vector_store = get_store('vector')
     results = vector_store.search(query_vector, top_k=top_k)
     
@@ -183,10 +189,24 @@ def semantic_search():
         ]
     }), 200
 
-# TODO: Implement Full-text Search API Endpoint
 @app.post('/full-text-search')
 def full_text_search():
-    pass
+    if 'query' not in request.json:
+        return jsonify({'error': 'No query provided'}), 400
+    
+    if 'k' not in request.json:
+        return jsonify({'error': 'No k value provided'}), 400
+    
+    query = request.json['query']
+    top_k = request.json['k']
+    
+    query = request.json['query']
+    text_store = get_store('text')
+    results = text_store.search(query, top_k=top_k)
+    
+    return jsonify({'results': results}), 200
 
 if __name__ == '__main__':
+    get_store('vector').clear()
+    get_store('text').clear()
     app.run(debug=True)
