@@ -5,6 +5,8 @@ from chunkers import get_chunker
 from embedders import get_embedder
 from stores import get_store
 import requests
+import uuid
+from collections import defaultdict
 
 BACKEND_URL_PATH = 'http://127.0.0.1:5000'
 
@@ -93,22 +95,27 @@ def store_embeddings():
     embeddings = request.json['embeddings']
     contents = request.json['contents']
     title = request.json['title']
+    ids = [str(uuid.uuid4()) for _ in embeddings]
     
     vector_store = get_store('vector')
     vector_store.add([
         {
+            'id': _id,
+            'metadata': {},
             'content': content,
             'vector': embedding,
             'title': title
-        } for embedding, content in zip(embeddings, contents)
+        } for _id, embedding, content in zip(ids, embeddings, contents)
     ])
     
     text_store = get_store('text')
     text_store.add([
         {
+            'id': _id,
+            'metadata': {},
             'content': content,
             'title': title
-        } for content in contents
+        } for _id, content in zip(ids, contents)
     ])
     
     return jsonify({'message': 'Successfully stored embeddings'}), 200
@@ -221,7 +228,31 @@ def rrf():
 
 @app.post('/rerank-results')
 def rerank():
-    pass
+    if 'semantic_search_results' not in request.json:
+        return jsonify({'error': 'No semantic search results provided'}), 400
+    
+    if 'full_text_search_results' not in request.json:
+        return jsonify({'error': 'No full-text search results provided'}), 400
+    
+    semantic_search_results = request.json['semantic_search_results']
+    full_text_search_results = request.json['full_text_search_results']
+    k = 60
+    
+    fused_results_mapping = {}
+    fused_scores = defaultdict(float)
+    for rank, result in enumerate(semantic_search_results, 1):
+        fused_scores[result['id']] += 1 / (k + rank)
+        fused_results_mapping[result['id']] = result
+        
+    for rank, result in enumerate(full_text_search_results, 1):
+        fused_scores[result['id']] += 1 / (k + rank)
+        fused_results_mapping[result['id']] = result
+    
+    fused_results = []
+    for doc_id, score in sorted(fused_scores.items(), key=lambda x: x[1], reverse=True):
+        fused_results.append(fused_results_mapping[doc_id])
+    
+    return jsonify({'results': fused_results}), 200
 
 
 if __name__ == '__main__':
