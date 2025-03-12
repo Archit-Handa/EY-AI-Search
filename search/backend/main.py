@@ -215,6 +215,15 @@ def full_text_search():
     
     return jsonify({'results': results}), 200
 
+@app.post('/rrf-results')
+def rrf():
+    pass
+
+@app.post('/rerank-results')
+def rerank():
+    pass
+
+
 if __name__ == '__main__':
     get_store('vector').clear()
     get_store('text').clear()
