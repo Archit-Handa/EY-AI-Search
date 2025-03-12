@@ -14,7 +14,7 @@ def query(query, embedder_name, model_name, k):
         response = requests.post(f'{BACKEND_URL_PATH}/query', json=request_body)
 
         if response.status_code == 200:
-            return response.json().get('results', [])
+            return response.json()
         
         else:
             raise ValueError(response.json().get('error', 'Search failed'))

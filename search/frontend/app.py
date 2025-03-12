@@ -299,15 +299,61 @@ def main():
                         st.error(f'❌ {st.session_state.error}')
                         
                 if st.session_state.results:
-                    with st.expander('**Search Results**', expanded=True):
-                        with st.container(height=600):
-                            for i, result in enumerate(st.session_state.results):
-                                with st.chat_message('Search Results', avatar='🔍'):
-                                    st.write(f'##### :primary[Search Result {i+1}]')
-                                    st.write(result['content'])
-                                    st.write(f'**:primary[Title:]** {result["title"]}')
-                                    st.write(f'**:primary[Score:]** {result["score"]:.4f}')
-                                    if i < len(st.session_state.results) - 1: st.write('---') 
+                    (
+                        rerank_results_tab,
+                        rrf_results_tab,
+                        semantic_search_results_tab,
+                        full_text_search_results_tab
+                    ) = st.tabs([
+                        'Reranked Results',
+                        'RRF Results',
+                        'Semantic Search Results',
+                        'Full-Text Search Results'
+                    ])
+
+                    with rerank_results_tab:
+                        with st.expander('**Reranked Search Results**', expanded=True):
+                            with st.container(height=600):
+                                for i, result in enumerate(st.session_state.results['rerank_results']):
+                                    with st.chat_message('Search Results', avatar='🔍'):
+                                        st.write(f'##### :primary[Search Result {i+1}]')
+                                        st.write(result['content'])
+                                        st.write(f'**:primary[Title:]** {result["title"]}')
+                                        st.write(f'**:primary[Score:]** {result["score"]:.4f}')
+                                        if i < len(st.session_state.results) - 1: st.write('---')
+                    
+                    with rrf_results_tab:
+                        with st.expander('**Reciprocal Rank Fusion (RRF) Search Results**', expanded=True):
+                            with st.container(height=600):
+                                for i, result in enumerate(st.session_state.results['rrf_results']):
+                                    with st.chat_message('Search Results', avatar='🔍'):
+                                        st.write(f'##### :primary[Search Result {i+1}]')
+                                        st.write(result['content'])
+                                        st.write(f'**:primary[Title:]** {result["title"]}')
+                                        st.write(f'**:primary[Score:]** {result["score"]:.4f}')
+                                        if i < len(st.session_state.results) - 1: st.write('---') 
+                    
+                    with semantic_search_results_tab:
+                        with st.expander('**Semantic Search Results**', expanded=True):
+                            with st.container(height=600):
+                                for i, result in enumerate(st.session_state.results['semantic_search_results']):
+                                    with st.chat_message('Search Results', avatar='🔍'):
+                                        st.write(f'##### :primary[Search Result {i+1}]')
+                                        st.write(result['content'])
+                                        st.write(f'**:primary[Title:]** {result["title"]}')
+                                        st.write(f'**:primary[Score:]** {result["score"]:.4f}')
+                                        if i < len(st.session_state.results) - 1: st.write('---')
+                                        
+                    with full_text_search_results_tab:
+                        with st.expander('**Full-Text Search Results**', expanded=True):
+                            with st.container(height=600):
+                                for i, result in enumerate(st.session_state.results['full_text_search_results']):
+                                    with st.chat_message('Search Results', avatar='🔍'):
+                                        st.write(f'##### :primary[Search Result {i+1}]')
+                                        st.write(result['content'])
+                                        st.write(f'**:primary[Title:]** {result["title"]}')
+                                        st.write(f'**:primary[Score:]** {result["score"]:.4f}')
+                                        if i < len(st.session_state.results) - 1: st.write('---') 
 
 
 if __name__ == '__main__':
