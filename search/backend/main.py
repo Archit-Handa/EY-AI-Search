@@ -182,7 +182,12 @@ def query():
     else:
         return rerank_response.json()['error'], 400
     
-    return jsonify({'results': rerank_results[:top_k]}), 200
+    return jsonify({
+        'semantic_search_results': semantic_search_results[:top_k],
+        'full_text_search_results': full_text_search_results[:top_k],
+        'rrf_results': rrf_results[:top_k],
+        'rerank_results': rerank_results[:top_k]
+    }), 200
 
 @app.post('/semantic-search')
 def semantic_search():
