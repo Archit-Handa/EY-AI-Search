@@ -140,7 +140,7 @@ def query():
         'query': query,
         'embedder': embedder_type,
         'model': model_name,
-        'k': top_k
+        'k': top_k * 2      # Fetching more results than required; will filter while responding
     }
     semantic_search_response = requests.post(f'{BACKEND_URL_PATH}/semantic-search', json=semantic_search_request_body)
     
@@ -151,7 +151,7 @@ def query():
     
     full_text_search_request_body = {
         'query': query,
-        'k': top_k
+        'k': top_k * 2      # Fetching more results than required; will filter while responding
     }
     full_text_search_response = requests.post(f'{BACKEND_URL_PATH}/full-text-search', json=full_text_search_request_body)
     
@@ -173,8 +173,8 @@ def query():
     
     # TODO: Integrate Cross-Encoder Reranking API Endpoint
     
-    # FIXME: For now, just forwarding semantic and full-text search results
-    return jsonify({'results': semantic_search_results + full_text_search_results}), 200
+    # FIXME: For now, just forwarding rrf results
+    return jsonify({'results': rrf_results}), 200
 
 @app.post('/semantic-search')
 def semantic_search():
@@ -233,10 +233,6 @@ def full_text_search():
 
 @app.post('/rrf-results')
 def rrf():
-    pass
-
-@app.post('/rerank-results')
-def rerank():
     if 'semantic_search_results' not in request.json:
         return jsonify({'error': 'No semantic search results provided'}), 400
     
@@ -262,6 +258,10 @@ def rerank():
         fused_results.append(fused_results_mapping[doc_id])
     
     return jsonify({'results': fused_results}), 200
+
+@app.post('/rerank-results')
+def rerank():
+    pass
 
 
 if __name__ == '__main__':
