@@ -69,9 +69,9 @@ class VectorStore(Store):
         
         try:
             self.db.command(index_definition)
-            print(f'✅ Created {index_type} Index with {num_dimensions} dimensions')
+            print(f'✅ Created {index_type} Vector Index with {num_dimensions} dimensions')
         except Exception as e:
-            print(f'❌ Error creating index: {e}')
+            print(f'❌ Error creating vector index: {e}')
 
     def add(self, documents: list[dict]) -> None:
         if not documents:
