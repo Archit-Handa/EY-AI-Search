@@ -140,7 +140,7 @@ def query():
         'query': query,
         'embedder': embedder_type,
         'model': model_name,
-        'k': top_k * 2      # Fetching more results than required; will filter while responding
+        'k': 10 if top_k < 7 else int(top_k * 1.5)      # Fetching more results than required; will filter while responding
     }
     semantic_search_response = requests.post(f'{BACKEND_URL_PATH}/semantic-search', json=semantic_search_request_body)
     
@@ -151,7 +151,7 @@ def query():
     
     full_text_search_request_body = {
         'query': query,
-        'k': top_k * 2      # Fetching more results than required; will filter while responding
+        'k': 10 if top_k < 5 else int(top_k * 1.5)      # Fetching more results than required; will filter while responding
     }
     full_text_search_response = requests.post(f'{BACKEND_URL_PATH}/full-text-search', json=full_text_search_request_body)
     
