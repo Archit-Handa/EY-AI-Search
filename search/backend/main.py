@@ -171,10 +171,18 @@ def query():
     else:
         return rrf_response.json()['error'], 400
     
-    # TODO: Integrate Cross-Encoder Reranking API Endpoint
+    rerank_request_body = {
+        'query': query,
+        'results': rrf_results
+    }
+    rerank_response = requests.post(f'{BACKEND_URL_PATH}/rerank-results', json=rerank_request_body)
     
-    # FIXME: For now, just forwarding rrf results
-    return jsonify({'results': rrf_results}), 200
+    if rerank_response.status_code == 200:
+        rerank_results = rerank_response.json()['results']
+    else:
+        return rerank_response.json()['error'], 400
+    
+    return jsonify({'results': rerank_results}), 200
 
 @app.post('/semantic-search')
 def semantic_search():
@@ -255,13 +263,37 @@ def rrf():
     
     fused_results = []
     for doc_id, score in sorted(fused_scores.items(), key=lambda x: x[1], reverse=True):
+        fused_results_mapping[doc_id]['score'] = score
         fused_results.append(fused_results_mapping[doc_id])
     
     return jsonify({'results': fused_results}), 200
 
 @app.post('/rerank-results')
 def rerank():
-    pass
+    from sentence_transformers import CrossEncoder
+    import torch
+    
+    if 'query' not in request.json:
+        return jsonify({'error': 'No query provided'}), 400
+    
+    if 'results' not in request.json:
+        return jsonify({'error': 'No search results provided'}), 400
+    
+    query = request.json['query']
+    results = request.json['results']
+    
+    print(f'{query = }')
+    
+    reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2', default_activation_function=torch.nn.Sigmoid())
+    rerank_inputs = []
+    for result in results:
+        rerank_inputs.append((query, result['content']))
+    rerank_scores = reranker.predict(rerank_inputs)
+    reranked_results = sorted(zip(results, rerank_scores), key=lambda x: x[1], reverse=True)
+    for result, score in reranked_results:
+        result['score'] = float(score)
+    
+    return jsonify({'results': [result[0] for result in reranked_results]}), 200
 
 
 if __name__ == '__main__':
