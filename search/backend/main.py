@@ -142,14 +142,23 @@ def query():
     else:
         return semantic_search_response.json()['error'], 400
     
-    # TODO: Integrate Full-text Search API Endpoint
+    full_text_search_request_body = {
+        'query': query,
+        'k': top_k
+    }
+    full_text_search_response = requests.post(f'{BACKEND_URL_PATH}/full-text-search', json=full_text_search_request_body)
+    
+    if full_text_search_response.status_code == 200:
+        full_text_search_results = full_text_search_response.json()['results']
+    else:
+        return full_text_search_response.json()['error'], 400
     
     # TODO: Integrate RRF API Endpoint
     
     # TODO: Integrate Cross-Encoder Reranking API Endpoint
     
-    # FIXME: For now, just forwarding semantic search results
-    return jsonify({'results': semantic_search_results}), 200
+    # FIXME: For now, just forwarding semantic and full-text search results
+    return jsonify({'results': semantic_search_results + full_text_search_results}), 200
 
 @app.post('/semantic-search')
 def semantic_search():
