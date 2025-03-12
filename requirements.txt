@@ -11,3 +11,4 @@ python-dotenv
 numpy<2
 pymongo
 uuid
+elasticsearch

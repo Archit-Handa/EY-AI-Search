@@ -103,6 +103,14 @@ def store_embeddings():
         } for embedding, content in zip(embeddings, contents)
     ])
     
+    text_store = get_store('text')
+    text_store.add([
+        {
+            'content': content,
+            'title': title
+        } for content in contents
+    ])
+    
     return jsonify({'message': 'Successfully stored embeddings'}), 200
 
 @app.post('/query')
@@ -134,14 +142,23 @@ def query():
     else:
         return semantic_search_response.json()['error'], 400
     
-    # TODO: Integrate Full-text Search API Endpoint
+    full_text_search_request_body = {
+        'query': query,
+        'k': top_k
+    }
+    full_text_search_response = requests.post(f'{BACKEND_URL_PATH}/full-text-search', json=full_text_search_request_body)
+    
+    if full_text_search_response.status_code == 200:
+        full_text_search_results = full_text_search_response.json()['results']
+    else:
+        return full_text_search_response.json()['error'], 400
     
     # TODO: Integrate RRF API Endpoint
     
     # TODO: Integrate Cross-Encoder Reranking API Endpoint
     
-    # FIXME: For now, just forwarding semantic search results
-    return jsonify({'results': semantic_search_results}), 200
+    # FIXME: For now, just forwarding semantic and full-text search results
+    return jsonify({'results': semantic_search_results + full_text_search_results}), 200
 
 @app.post('/semantic-search')
 def semantic_search():
@@ -165,8 +182,6 @@ def semantic_search():
         return jsonify({'error': 'Unsupported embedder type'}), 400
     
     query_vector = embedder(query)
-    
-    query = request.json['query']
     vector_store = get_store('vector')
     results = vector_store.search(query_vector, top_k=top_k)
     
@@ -183,10 +198,24 @@ def semantic_search():
         ]
     }), 200
 
-# TODO: Implement Full-text Search API Endpoint
 @app.post('/full-text-search')
 def full_text_search():
-    pass
+    if 'query' not in request.json:
+        return jsonify({'error': 'No query provided'}), 400
+    
+    if 'k' not in request.json:
+        return jsonify({'error': 'No k value provided'}), 400
+    
+    query = request.json['query']
+    top_k = request.json['k']
+    
+    query = request.json['query']
+    text_store = get_store('text')
+    results = text_store.search(query, top_k=top_k)
+    
+    return jsonify({'results': results}), 200
 
 if __name__ == '__main__':
+    get_store('vector').clear()
+    get_store('text').clear()
     app.run(debug=True)
