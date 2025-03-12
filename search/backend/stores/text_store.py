@@ -2,7 +2,6 @@ from .base import Store
 from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
 import os
-import uuid
 
 load_dotenv()
 
@@ -55,8 +54,6 @@ class TextStore(Store):
             return
         
         for doc in documents:
-            doc['id'] = str(uuid.uuid4())
-            doc.setdefault('metadata', {})
             self.client.index(index=self.index_name, id=doc['id'], body=doc)
     
     def get(self, doc_id: str) -> dict:
