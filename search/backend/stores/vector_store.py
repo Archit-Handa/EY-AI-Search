@@ -2,7 +2,6 @@ from .base import Store
 from dotenv import load_dotenv
 import pymongo
 import os
-import uuid
 
 load_dotenv()
 
@@ -76,10 +75,6 @@ class VectorStore(Store):
     def add(self, documents: list[dict]) -> None:
         if not documents:
             return
-        
-        for doc in documents:
-            doc['id'] = str(uuid.uuid4())
-            doc.setdefault('metadata', {})
         
         self.collection.insert_many(documents)
         

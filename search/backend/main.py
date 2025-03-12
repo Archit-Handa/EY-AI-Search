@@ -5,6 +5,8 @@ from chunkers import get_chunker
 from embedders import get_embedder
 from stores import get_store
 import requests
+import uuid
+from collections import defaultdict
 
 BACKEND_URL_PATH = 'http://127.0.0.1:5000'
 
@@ -93,22 +95,27 @@ def store_embeddings():
     embeddings = request.json['embeddings']
     contents = request.json['contents']
     title = request.json['title']
+    ids = [str(uuid.uuid4()) for _ in embeddings]
     
     vector_store = get_store('vector')
     vector_store.add([
         {
+            'id': _id,
+            'metadata': {},
             'content': content,
             'vector': embedding,
             'title': title
-        } for embedding, content in zip(embeddings, contents)
+        } for _id, embedding, content in zip(ids, embeddings, contents)
     ])
     
     text_store = get_store('text')
     text_store.add([
         {
+            'id': _id,
+            'metadata': {},
             'content': content,
             'title': title
-        } for content in contents
+        } for _id, content in zip(ids, contents)
     ])
     
     return jsonify({'message': 'Successfully stored embeddings'}), 200
@@ -133,7 +140,7 @@ def query():
         'query': query,
         'embedder': embedder_type,
         'model': model_name,
-        'k': top_k
+        'k': 10 if top_k < 7 else int(top_k * 1.5)      # Fetching more results than required; will filter while responding
     }
     semantic_search_response = requests.post(f'{BACKEND_URL_PATH}/semantic-search', json=semantic_search_request_body)
     
@@ -144,7 +151,7 @@ def query():
     
     full_text_search_request_body = {
         'query': query,
-        'k': top_k
+        'k': 10 if top_k < 5 else int(top_k * 1.5)      # Fetching more results than required; will filter while responding
     }
     full_text_search_response = requests.post(f'{BACKEND_URL_PATH}/full-text-search', json=full_text_search_request_body)
     
@@ -153,12 +160,34 @@ def query():
     else:
         return full_text_search_response.json()['error'], 400
     
-    # TODO: Integrate RRF API Endpoint
+    rrf_request_body = {
+        'semantic_search_results': semantic_search_results,
+        'full_text_search_results': full_text_search_results
+    }
+    rrf_response = requests.post(f'{BACKEND_URL_PATH}/rrf-results', json=rrf_request_body)
     
-    # TODO: Integrate Cross-Encoder Reranking API Endpoint
+    if rrf_response.status_code == 200:
+        rrf_results = rrf_response.json()['results']
+    else:
+        return rrf_response.json()['error'], 400
     
-    # FIXME: For now, just forwarding semantic and full-text search results
-    return jsonify({'results': semantic_search_results + full_text_search_results}), 200
+    rerank_request_body = {
+        'query': query,
+        'results': rrf_results
+    }
+    rerank_response = requests.post(f'{BACKEND_URL_PATH}/rerank-results', json=rerank_request_body)
+    
+    if rerank_response.status_code == 200:
+        rerank_results = rerank_response.json()['results']
+    else:
+        return rerank_response.json()['error'], 400
+    
+    return jsonify({
+        'semantic_search_results': semantic_search_results[:top_k],
+        'full_text_search_results': full_text_search_results[:top_k],
+        'rrf_results': rrf_results[:top_k],
+        'rerank_results': rerank_results[:top_k]
+    }), 200
 
 @app.post('/semantic-search')
 def semantic_search():
@@ -214,6 +243,63 @@ def full_text_search():
     results = text_store.search(query, top_k=top_k)
     
     return jsonify({'results': results}), 200
+
+@app.post('/rrf-results')
+def rrf():
+    if 'semantic_search_results' not in request.json:
+        return jsonify({'error': 'No semantic search results provided'}), 400
+    
+    if 'full_text_search_results' not in request.json:
+        return jsonify({'error': 'No full-text search results provided'}), 400
+    
+    semantic_search_results = request.json['semantic_search_results']
+    full_text_search_results = request.json['full_text_search_results']
+    k = 60
+    
+    fused_results_mapping = {}
+    fused_scores = defaultdict(float)
+    for rank, result in enumerate(semantic_search_results, 1):
+        fused_scores[result['id']] += 1 / (k + rank)
+        fused_results_mapping[result['id']] = result
+        
+    for rank, result in enumerate(full_text_search_results, 1):
+        fused_scores[result['id']] += 1 / (k + rank)
+        fused_results_mapping[result['id']] = result
+    
+    fused_results = []
+    for doc_id, score in sorted(fused_scores.items(), key=lambda x: x[1], reverse=True):
+        fused_results_mapping[doc_id]['score'] = score
+        fused_results.append(fused_results_mapping[doc_id])
+    
+    return jsonify({'results': fused_results}), 200
+
+@app.post('/rerank-results')
+def rerank():
+    from sentence_transformers import CrossEncoder
+    import torch
+    
+    if 'query' not in request.json:
+        return jsonify({'error': 'No query provided'}), 400
+    
+    if 'results' not in request.json:
+        return jsonify({'error': 'No search results provided'}), 400
+    
+    query = request.json['query']
+    results = request.json['results']
+    
+    print(f'{query = }')
+    
+    reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2', default_activation_function=torch.nn.Sigmoid())
+    rerank_inputs = []
+    for result in results:
+        rerank_inputs.append((query, result['content']))
+    rerank_scores = reranker.predict(rerank_inputs)
+    reranked_results = sorted(zip(results, rerank_scores), key=lambda x: x[1], reverse=True)
+    for result, score in reranked_results:
+        result['score'] = float(score)
+    
+    return jsonify({'results': [result[0] for result in reranked_results]}), 200
+
 
 if __name__ == '__main__':
     get_store('vector').clear()
