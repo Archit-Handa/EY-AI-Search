@@ -160,7 +160,16 @@ def query():
     else:
         return full_text_search_response.json()['error'], 400
     
-    # TODO: Integrate RRF API Endpoint
+    rrf_request_body = {
+        'semantic_search_results': semantic_search_results,
+        'full_text_search_results': full_text_search_results
+    }
+    rrf_response = requests.post(f'{BACKEND_URL_PATH}/rrf-results', json=rrf_request_body)
+    
+    if rrf_response.status_code == 200:
+        rrf_results = rrf_response.json()['results']
+    else:
+        return rrf_response.json()['error'], 400
     
     # TODO: Integrate Cross-Encoder Reranking API Endpoint
     
