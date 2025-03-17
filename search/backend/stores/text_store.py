@@ -59,7 +59,7 @@ class TextStore(Store):
                 self.client.index(index=self.index_name, id=doc['id'], body=doc)
             
             except Exception as err:
-                print(f'❌ Failed to insert document {doc.get('id')}: {err}')
+                print(f'❌ Failed to insert document {doc.get("id")}: {err}')
         
         print(f'✅ Successfully inserted {len(documents)} documents into text store.')
     

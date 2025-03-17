@@ -89,7 +89,7 @@ class VectorStore(Store):
                 try:
                     self.collection.insert_one(doc)
                 except Exception as err:
-                    print(f'❌ Failed to insert document {doc.get('id')}: {err}')
+                    print(f'❌ Failed to insert document {doc.get("id")}: {err}')
     
     def get(self, doc_id: str) -> dict:
         return self.collection.find_one({'id': doc_id}, {'_id': 0})

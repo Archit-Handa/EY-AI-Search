@@ -10,5 +10,5 @@ class FixedSizeChunker(Chunker):
         self.chunk_size = chunk_size
     
     def chunk(self, text: str) -> Iterator[str]:
-        '''Yiwld fixed-size chunks from the input text'''
+        '''Yield fixed-size chunks from the input text'''
         return (text[i : i + self.chunk_size] for i in range(0, len(text), self.chunk_size))

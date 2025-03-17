@@ -3,8 +3,8 @@ from typing import Iterator
 
 class PageChunker(Chunker):
     '''Chunk a text into smaller chunks based on page breaks'''
-    def __init__(self, page_break: str = '\f'):
-        self.page_break = page_break
+    def __init__(self):
+        self.page_break = '\f'
     
     def chunk(self, text: str) -> Iterator[str]:
         '''Yield text chunks split by page breaks'''
