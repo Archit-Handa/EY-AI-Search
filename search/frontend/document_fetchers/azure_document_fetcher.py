@@ -7,6 +7,7 @@ class AzureDocumentFetcher(DocumentFetcher):
     '''Fetch and return a document from Azure Blob Storage'''
     
     def fetch_document(self):
+        '''Fetch and return a document from Azure Blob Storage'''
         AZURE_CONNECTION_STRING = st.text_input(
             label='Azure Storage Connection String',
             value=None,

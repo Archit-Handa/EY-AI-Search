@@ -1,9 +1,13 @@
 from .base import Chunker
-from typing import Generator
+import re
+from typing import Iterator
 
 class ParagraphChunker(Chunker):
     '''Chunk a text into smaller chunks based on paragraph breaks'''
+    def __init__(self):
+        self.paragraph_break = '\n'
     
-    def chunk(self, text: str) -> Generator[str, None, None]:
-        for para in text.split('\n'):
-            if para != '': yield para
+    def chunk(self, text: str) -> Iterator[str]:
+        '''Yield text chunks split by paragraph breaks'''
+        paragraph_pattern = re.compile(r'(?<=[.!?])\n+')
+        return filter(None, map(str.strip, paragraph_pattern.split(text)))

@@ -11,16 +11,13 @@ class Embedder(ABC):
         @param input: The text or list of texts to embed
         @return: The embeddings
         '''
-        if not input:
-            return []
+        if not isinstance(input, (str, list)):
+            raise ValueError('Input must be a string or a list of strings')
         
         if isinstance(input, str):
             return self._embed([input])[0]
-        elif isinstance(input, list) and all(isinstance(item, str) for item in input):
-            embeddings = self._embed(input)
-            return [x.tolist() for x in embeddings] if not isinstance(embeddings[0], list) else embeddings
-        else:
-            raise ValueError('Input must be a string or a list of strings')
+        
+        return self._embed(input)
     
     @abstractmethod
     def _embed(self, input: list[str]) -> list[list[float]]:

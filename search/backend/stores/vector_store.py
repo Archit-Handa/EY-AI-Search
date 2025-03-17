@@ -25,7 +25,7 @@ class VectorStore(Store):
         if sample_doc and 'vector' in sample_doc:
             num_dimensions = len(sample_doc['vector'])
         else:
-            print('⚠️ No existing embeddings found in collection. Index creation deferred to post insertion of documents.')
+            print('⚠️ No existing embeddings found in collection. Index creation deferred until documents are added.')
             return
         
         cosmos_search_options = {
@@ -61,7 +61,7 @@ class VectorStore(Store):
                     'key': {
                         'vector': 'cosmosSearch'
                     },
-                    'cosmosSearchOptions': cosmos_search_options.get(index_type.lower(), cosmos_search_options.get('ivf'))
+                    'cosmosSearchOptions': cosmos_search_options.get(index_type.lower(), cosmos_search_options['ivf'])
                 }
             ]
         }
@@ -74,11 +74,22 @@ class VectorStore(Store):
 
     def add(self, documents: list[dict]) -> None:
         if not documents:
+            print('⚠️ No documents provided for insertion.')
             return
-        
-        self.collection.insert_many(documents)
-        
-        self._ensure_index()
+        try:
+            self.collection.insert_many(documents)
+            print(f'✅ Successfully inserted {len(documents)} documents into vector store.')
+            
+            self._ensure_index()
+            
+        except Exception as e:
+            print(f'❌ Bulk insert failed: {e}\nRetrying individually...')
+            
+            for doc in documents:
+                try:
+                    self.collection.insert_one(doc)
+                except Exception as err:
+                    print(f'❌ Failed to insert document {doc.get("id")}: {err}')
     
     def get(self, doc_id: str) -> dict:
         return self.collection.find_one({'id': doc_id}, {'_id': 0})
@@ -88,8 +99,13 @@ class VectorStore(Store):
         
     def clear(self) -> None:
         self.collection.delete_many({})
+        self.collection.drop_indexes()
     
     def search(self, query_vector: list[float], top_k: int=5) -> list[dict]:
+        if not query_vector:
+            print('⚠️ No query vector provided for search.')
+            return []
+        
         pipeline = [
             {
                 '$search': {
@@ -110,8 +126,13 @@ class VectorStore(Store):
                 }
             }
         ]
-            
-        return list(self.collection.aggregate(pipeline))
+        
+        try:
+            return list(self.collection.aggregate(pipeline))
+        
+        except Exception as e:
+            print(f'❌ Search failed: {e}')
+            return []
     
     def close(self) -> None:
         self.client.close()

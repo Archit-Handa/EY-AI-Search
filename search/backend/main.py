@@ -39,7 +39,7 @@ def chunk_text():
     text = request.json['text']
     chunker_type = request.json['type']
     chunk_size = request.json.get('chunk_size', 200)
-    chunker = get_chunker(chunker_type, **{'chunk_size': chunk_size})
+    chunker = get_chunker(chunker_type, chunk_size=chunk_size)
     
     if chunker is None:
         return jsonify({'error': 'Unsupported chunker type'}), 400
@@ -63,7 +63,8 @@ def embed_chunks():
     title = request.json['title']
     embedder_type = request.json['embedder']
     model_name = request.json.get('model')
-    embedder = get_embedder(embedder_type, **{'model_name': model_name} if model_name else {})
+    embedder = get_embedder(embedder_type, model_name=model_name) if model_name \
+        else get_embedder(embedder_type)
     
     if embedder is None:
         return jsonify({'error': 'Unsupported embedder type'}), 400
@@ -205,7 +206,8 @@ def semantic_search():
     model_name = request.json.get('model')
     top_k = request.json['k']
     
-    embedder = get_embedder(embedder_type, **{'model_name': model_name} if model_name else {})
+    embedder = get_embedder(embedder_type, model_name=model_name) if model_name \
+        else get_embedder(embedder_type)
     
     if embedder is None:
         return jsonify({'error': 'Unsupported embedder type'}), 400

@@ -51,10 +51,17 @@ class TextStore(Store):
     
     def add(self, documents: list[dict]) -> None:
         if not documents:
+            print('⚠️ No documents provided for insertion.')
             return
         
         for doc in documents:
-            self.client.index(index=self.index_name, id=doc['id'], body=doc)
+            try:
+                self.client.index(index=self.index_name, id=doc['id'], body=doc)
+            
+            except Exception as err:
+                print(f'❌ Failed to insert document {doc.get("id")}: {err}')
+        
+        print(f'✅ Successfully inserted {len(documents)} documents into text store.')
     
     def get(self, doc_id: str) -> dict:
         try:
@@ -69,6 +76,10 @@ class TextStore(Store):
         self.client.indices.delete(index=self.index_name, ignore=[404])
     
     def search(self, query: str, top_k: int=5) -> list[dict]:
+        if not query:
+            print('⚠️ No query provided for search.')
+            return []
+        
         query_body = {
             'query': {
                 'match': {
@@ -80,11 +91,16 @@ class TextStore(Store):
             'size': top_k
         }
         
-        results = self.client.search(index=self.index_name, body=query_body)
-        return [{
-            'score': hit['_score'],
-            **hit['_source']
-        } for hit in results['hits']['hits']]
+        try:
+            results = self.client.search(index=self.index_name, body=query_body)
+            return [{
+                'score': hit['_score'],
+                **hit['_source']
+            } for hit in results['hits']['hits']]
+        
+        except Exception as e:
+            print(f'❌ Search failed: {e}')
+            return []
     
     def close(self) -> None:
         self.client.close()
