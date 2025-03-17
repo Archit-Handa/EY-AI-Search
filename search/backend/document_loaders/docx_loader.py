@@ -9,5 +9,5 @@ class DocxLoader(DocumentLoader):
     def load(self, file_stream: BinaryIO) -> str:
         '''Extract text from a .docx file stream'''
         doc = docx.Document(BytesIO(file_stream.read()))
-        text = '\n'.join(map(str.strip, (para.text for para in doc.paragraphs)))
+        text = '\n\n'.join(para.text for para in doc.paragraphs)
         return text.strip()
