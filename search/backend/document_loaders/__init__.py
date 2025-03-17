@@ -24,4 +24,5 @@ def get_loader(file_extension: str) -> DocumentLoader:
         
     return loader_class()
 
+
 __all__ = ['get_loader']
