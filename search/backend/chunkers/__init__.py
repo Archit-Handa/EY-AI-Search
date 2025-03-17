@@ -5,7 +5,7 @@ from .paragraph_chunker import ParagraphChunker
 from .sentence_chunker import SentenceChunker
 from .fixed_size_chunker import FixedSizeChunker
 
-_chunkers = {
+_CHUNKERS = {
     'page': PageChunker,
     'paragraph': ParagraphChunker,
     'sentence': SentenceChunker,
@@ -13,12 +13,18 @@ _chunkers = {
 }
 
 def get_chunker(chunker_type: str, **kwargs) -> Chunker:
-    chunker = _chunkers.get(chunker_type.lower())
+    '''
+    Retrieve the appropriate chunker for the given chunker type
     
-    if chunker is None:
+    @param chunker_type: Type of chunker to retrieve
+    @return: Chunker to be used for chunking text
+    '''
+    chunker_class = _CHUNKERS.get(chunker_type.lower())
+    
+    if chunker_class is None:
         raise ValueError(f'Unknown chunker type: {chunker_type}')
     
-    return chunker(**kwargs) if inspect.signature(chunker).parameters else chunker()
+    return chunker_class(**kwargs) if inspect.signature(chunker_class).parameters else chunker_class()
 
 
 __all__ = ['get_chunker']

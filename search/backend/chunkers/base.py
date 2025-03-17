@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Generator
+from typing import Iterator
 
 class Chunker(ABC):
     '''Abstract base class for chunkers'''
     
     @abstractmethod
-    def chunk(self, text: str) -> Generator[str, None, None]:
+    def chunk(self, text: str) -> Iterator[str]:
         '''
         Chunk a text into smaller chunks
         
