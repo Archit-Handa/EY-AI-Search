@@ -48,10 +48,10 @@ ELASTICSEARCH_PASSWORD=your-elasticsearch-password
 To run the application, execute the following command:
 
 ```console
-foo@bar:~$ pwd
+$ pwd
 path/to/EY-AI-SEARCH
 
-foo@bar:~$ bash runner.sh
+$ bash runner.sh
 ```
 
 Once the application is running, you can visit [http://localhost:8501](http://localhost:8501) to use the application on a Streamlit interface. The Flask Backend runs on [http://localhost:5000](http://localhost:5000)
