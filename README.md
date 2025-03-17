@@ -30,17 +30,28 @@ However, these are easily extensible by implementing the corresponding `base` cl
 Before running the application, make sure to create a `.env` file in the `search/` directory and define the following environment variables:
 
 ```.env
-AZURE_OPENAI_API_KEY="YOUR-OPENAI-API_KEY"
-AZURE_OPENAI_API_VERSION="2024-10-21" or "YOUR-OPENAI-API-VERSION"
-AZURE_OPENAI_ENDPOINT="YOUR-OPENAI-ENDPOINT"
-COSMOSDB_CONNECTION_STRING="YOUR-COSMOSDB-CONNECTION-STRING"
-COSMOSDB_DATABASE_NAME="Vector-Store" or "YOUR-COSMOS-DATABASE-NAME"
+AZURE_OPENAI_API_KEY=your-openai-api-key
+AZURE_OPENAI_API_VERSION="2024-10-21" or your-openai-version
+AZURE_OPENAI_ENDPOINT=your-openai-endpoint
+
+COSMOSDB_CONNECTION_STRING=your-cosmosdb-connection-string
+COSMOSDB_DATABASE_NAME="Vector-Store" or your-cosmosdb-database-name
+COSMOSDB_USERNAME=your-cosmosdb-username
+COSMOSDB_PASSWORD=your-cosmosdb-password
+
+ELASTICSEARCH_HOST=your-elasticsearch-host
+ELASTICSEARCH_API_KEY=your-elasticsearch-api-key
+ELASTICSEARCH_USERNAME=your-elasticsearch-username
+ELASTICSEARCH_PASSWORD=your-elasticsearch-password
 ```
 
 To run the application, execute the following command:
 
-```bash
-bash runner.sh
+```console
+foo@bar:~$ pwd
+path/to/EY-AI-SEARCH
+
+foo@bar:~$ bash runner.sh
 ```
 
 Once the application is running, you can visit [http://localhost:8501](http://localhost:8501) to use the application on a Streamlit interface. The Flask Backend runs on [http://localhost:5000](http://localhost:5000)
