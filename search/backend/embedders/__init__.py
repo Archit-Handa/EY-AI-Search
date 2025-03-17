@@ -19,5 +19,6 @@ def get_embedder(embedder_type: str, **kwargs) -> Embedder:
         raise ValueError(f'Unknown embedder: {embedder_type}')
     
     return embedder_class(**kwargs)
-    
+
+
 __all__ = ['get_embedder']
