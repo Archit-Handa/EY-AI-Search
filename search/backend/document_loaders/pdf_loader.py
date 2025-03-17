@@ -1,16 +1,14 @@
 import fitz
 from .base import DocumentLoader
+from typing import BinaryIO
 
 class PDFLoader(DocumentLoader):
     '''Loader for .pdf files'''
     
-    def load(self, file_stream: str) -> str:
-        text = ''
+    def load(self, file_stream: BinaryIO) -> str:
+        '''Extract text from a .pdf file stream'''
         try:
             with fitz.open(stream=file_stream.read(), filetype='pdf') as doc:
-                for page in doc:
-                    text += page.get_text('text') + '\n'
+                return '\n'.join(page.get_text('text').strip() for page in doc)
         except Exception as e:
-            text = f'Error loading PDF: {e}'
-        
-        return text
+            raise ValueError(f'Error extracting text from PDF: {e}')
