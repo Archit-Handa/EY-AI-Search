@@ -7,7 +7,7 @@ class SBertEmbedder(Embedder):
     
     def _embed(self, input: list[str]) -> list[list[float]]:
         try:
-            return self.model.encode(input, normalize_embeddings=True)
+            return self.model.encode(input, normalize_embeddings=True).tolist()
         
         except Exception as e:
             print(f'Error embedding text: {e}')

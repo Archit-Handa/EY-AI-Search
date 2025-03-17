@@ -7,11 +7,11 @@ _embedders = {
     'sbert': SBertEmbedder
 }
 
-def get_embedder(embedder_name: str, **kwargs) -> Embedder:
+def get_embedder(embedder_type: str, **kwargs) -> Embedder:
     try:
-        return _embedders[embedder_name.lower()](**kwargs)
+        return _embedders[embedder_type.lower()](**kwargs)
     
     except KeyError:
-        raise ValueError(f'Unknown embedder: {embedder_name}')
+        raise ValueError(f'Unknown embedder: {embedder_type}')
     
 __all__ = ['get_embedder']

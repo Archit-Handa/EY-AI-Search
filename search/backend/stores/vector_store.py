@@ -88,6 +88,7 @@ class VectorStore(Store):
         
     def clear(self) -> None:
         self.collection.delete_many({})
+        self.collection.drop_indexes()
     
     def search(self, query_vector: list[float], top_k: int=5) -> list[dict]:
         pipeline = [
