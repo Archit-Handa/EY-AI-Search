@@ -12,7 +12,8 @@ class OpenAIEmbedder(Embedder):
         self.api_version = os.getenv('AZURE_OPENAI_API_VERSION')
         self.api_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
         
-        if not self.api_key: raise ValueError('OpenAI API Key is missing. Set it as an environment variable: OPENAI_API_KEY')
+        if not all([self.api_key, self.api_version, self.api_endpoint]):
+            raise ValueError('Missing OpenAI API configuration. Ensure AZURE_OPENAI_API_KEY, AZURE_OPENAI_API_VERSION, and AZURE_OPENAI_ENDPOINT are set.')
         
         self.client = AzureOpenAI(
             api_key=self.api_key,
@@ -26,5 +27,4 @@ class OpenAIEmbedder(Embedder):
             return [data.embedding for data in response.data]
         
         except Exception as e:
-            print(f'OpenAI API Error: {e}')
-            return []
+            raise RuntimeError(f'Error embedding text with OpenAI: {e}')
