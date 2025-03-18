@@ -289,8 +289,6 @@ def rerank():
     query = request.json['query']
     results = request.json['results']
     
-    print(f'{query = }')
-    
     reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2', default_activation_function=torch.nn.Sigmoid())
     rerank_inputs = []
     for result in results:
