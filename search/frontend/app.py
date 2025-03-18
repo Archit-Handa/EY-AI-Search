@@ -186,7 +186,7 @@ def main():
                 'OpenAI': [
                     'text-embedding-ada-002',
                     'text-embedding-3-small',
-                    'text-embedding-3-large',
+                    # 'text-embedding-3-large', # Not supported by CosmosDB - capped to vector of length 2000 only
                     'Other Model'
                 ]
             }
